@@ -1,7 +1,13 @@
 "use client";
 
+// ==========================================
+// 01. IMPORTS
+// ==========================================
 import { useEffect, useMemo, useRef, useState } from "react";
 
+// ==========================================
+// 02. TYPES
+// ==========================================
 type PricePlan = {
   name: string;
   monthly: number;
@@ -17,12 +23,52 @@ type FaqItem = {
   a: string;
 };
 
+// ==========================================
+// 03. PAGE COMPONENT
+// ==========================================
 export default function Page() {
+  // ==========================================
+  // 04. UI STATE
+  // ==========================================
   const [scrolled, setScrolled] = useState(false);
   const [annual, setAnnual] = useState(false);
   const [openFaq, setOpenFaq] = useState(0);
+
+  // ==========================================
+  // 05. ROTATING HERO BADGE TEXT
+  // ==========================================
+  const rotatingPhrases = useMemo(
+    () => [
+      "Automatizza la pubblicazione social",
+      "Pubblica senza passaggi manuali",
+      "Gestisci i contenuti da un solo posto",
+      "Il tuo workflow, in autopilota",
+      "Social posting, finalmente semplice",
+    ],
+    []
+  );
+
+  const [phraseIndex, setPhraseIndex] = useState(0);
+  const [phraseVisible, setPhraseVisible] = useState(true);
+
+  // ==========================================
+  // 06. REVEAL ANIMATION REFS
+  // ==========================================
   const revealRefs = useRef<(HTMLElement | null)[]>([]);
 
+  const setRevealRef = (index: number) => (el: HTMLElement | null) => {
+    revealRefs.current[index] = el;
+  };
+
+  let revealIndex = 0;
+  const nextRevealRef = () => {
+    const idx = revealIndex++;
+    return setRevealRef(idx);
+  };
+
+  // ==========================================
+  // 07. CONTENT - FEATURES
+  // ==========================================
   const features = useMemo(
     () => [
       {
@@ -59,6 +105,9 @@ export default function Page() {
     []
   );
 
+  // ==========================================
+  // 08. CONTENT - HOW IT WORKS
+  // ==========================================
   const steps = useMemo(
     () => [
       {
@@ -80,6 +129,9 @@ export default function Page() {
     []
   );
 
+  // ==========================================
+  // 09. CONTENT - PRICING
+  // ==========================================
   const pricing: PricePlan[] = useMemo(
     () => [
       {
@@ -124,6 +176,9 @@ export default function Page() {
     []
   );
 
+  // ==========================================
+  // 10. CONTENT - FAQ
+  // ==========================================
   const faqs: FaqItem[] = useMemo(
     () => [
       {
@@ -150,6 +205,9 @@ export default function Page() {
     []
   );
 
+  // ==========================================
+  // 11. EFFECT - NAV SCROLL + REVEAL ON SCROLL
+  // ==========================================
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
@@ -158,11 +216,10 @@ export default function Page() {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const el = entry.target as HTMLElement;
-            el.classList.add("visible");
-            observer.unobserve(el);
-          }
+          if (!entry.isIntersecting) return;
+          const el = entry.target as HTMLElement;
+          el.classList.add("visible");
+          observer.unobserve(el);
         });
       },
       { threshold: 0.15 }
@@ -180,19 +237,31 @@ export default function Page() {
     };
   }, []);
 
-  const setRevealRef = (index: number) => (el: HTMLElement | null) => {
-    revealRefs.current[index] = el;
-  };
+  // ==========================================
+  // 12. EFFECT - HERO BADGE TEXT ROTATION
+  // ==========================================
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPhraseVisible(false);
 
-  let revealIndex = 0;
-  const nextRevealRef = () => {
-    const idx = revealIndex++;
-    return setRevealRef(idx);
-  };
+      setTimeout(() => {
+        setPhraseIndex((prev) => (prev + 1) % rotatingPhrases.length);
+        setPhraseVisible(true);
+      }, 250);
+    }, 2600);
 
+    return () => clearInterval(interval);
+  }, [rotatingPhrases.length]);
+
+  // ==========================================
+  // 13. RENDER
+  // ==========================================
   return (
     <>
       <div className="uppilot-page">
+        {/* ========================================== */}
+        {/* 14. NAVBAR */}
+        {/* ========================================== */}
         <nav className={`nav ${scrolled ? "scrolled" : ""}`} id="nav">
           <div className="nav-logo">
             <div className="nav-icon">UP</div>
@@ -210,6 +279,9 @@ export default function Page() {
           </div>
         </nav>
 
+        {/* ========================================== */}
+        {/* 15. HERO */}
+        {/* ========================================== */}
         <section className="hero">
           <div className="hero-glow1" />
           <div className="hero-glow2" />
@@ -217,7 +289,9 @@ export default function Page() {
           <div ref={nextRevealRef()} className="fade">
             <div className="hero-badge">
               <div className="hero-badge-dot" />
-              <span>Automatizza la pubblicazione social</span>
+              <span className={`hero-badge-text ${phraseVisible ? "is-visible" : "is-hidden"}`}>
+                {rotatingPhrases[phraseIndex]}
+              </span>
             </div>
           </div>
 
@@ -261,6 +335,9 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ========================================== */}
+        {/* 16. FEATURES */}
+        {/* ========================================== */}
         <section className="section" id="funzionalita">
           <div ref={nextRevealRef()} className="section-center fade">
             <div className="section-eyebrow">Funzionalità</div>
@@ -282,6 +359,9 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ========================================== */}
+        {/* 17. HOW IT WORKS */}
+        {/* ========================================== */}
         <section className="how-section" id="come-funziona">
           <div className="how-bg" />
           <div className="how-inner">
@@ -303,24 +383,19 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ========================================== */}
+        {/* 18. PRICING */}
+        {/* ========================================== */}
         <section className="section" id="pricing">
           <div ref={nextRevealRef()} className="section-center fade">
             <div className="section-eyebrow">Pricing trasparente</div>
             <h2 className="section-title">Scegli il piano giusto per te</h2>
 
             <div className="pricing-toggle pricing-toggle-top">
-              <button
-                type="button"
-                className={!annual ? "active" : ""}
-                onClick={() => setAnnual(false)}
-              >
+              <button type="button" className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>
                 Mensile
               </button>
-              <button
-                type="button"
-                className={annual ? "active" : ""}
-                onClick={() => setAnnual(true)}
-              >
+              <button type="button" className={annual ? "active" : ""} onClick={() => setAnnual(true)}>
                 Annuale <span className="annual-discount">-20%</span>
               </button>
             </div>
@@ -328,15 +403,10 @@ export default function Page() {
 
           <div className="pricing-grid" id="pricing-grid">
             {pricing.map((plan) => {
-              const shownPrice =
-                plan.yearly !== undefined && annual ? plan.yearly : plan.monthly;
+              const shownPrice = plan.yearly !== undefined && annual ? plan.yearly : plan.monthly;
 
               return (
-                <div
-                  key={plan.name}
-                  ref={nextRevealRef()}
-                  className={`price-card fade ${plan.highlighted ? "highlight" : ""}`}
-                >
+                <div key={plan.name} ref={nextRevealRef()} className={`price-card fade ${plan.highlighted ? "highlight" : ""}`}>
                   {plan.highlighted && <div className="price-card-badge">Popular</div>}
 
                   <div className="price-plan">{plan.name}</div>
@@ -374,6 +444,9 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ========================================== */}
+        {/* 19. TESTIMONIAL */}
+        {/* ========================================== */}
         <section className="testimonial">
           <div ref={nextRevealRef()} className="testimonial-inner fade">
             <div className="testimonial-quote-mark">"</div>
@@ -386,6 +459,9 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ========================================== */}
+        {/* 20. FAQ */}
+        {/* ========================================== */}
         <section className="faq" id="faq">
           <div ref={nextRevealRef()} className="section-center fade">
             <div className="section-eyebrow">Domande frequenti</div>
@@ -396,16 +472,8 @@ export default function Page() {
             {faqs.map((faq, index) => {
               const isOpen = openFaq === index;
               return (
-                <div
-                  key={faq.q}
-                  ref={nextRevealRef()}
-                  className={`faq-item fade ${isOpen ? "open" : ""}`}
-                >
-                  <button
-                    type="button"
-                    className="faq-btn"
-                    onClick={() => setOpenFaq(isOpen ? -1 : index)}
-                  >
+                <div key={faq.q} ref={nextRevealRef()} className={`faq-item fade ${isOpen ? "open" : ""}`}>
+                  <button type="button" className="faq-btn" onClick={() => setOpenFaq(isOpen ? -1 : index)}>
                     <span>{faq.q}</span>
                     <span className="faq-icon">+</span>
                   </button>
@@ -418,6 +486,9 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ========================================== */}
+        {/* 21. CTA */}
+        {/* ========================================== */}
         <section className="cta-section">
           <div ref={nextRevealRef()} className="cta-box fade">
             <div className="cta-glow" />
@@ -429,6 +500,9 @@ export default function Page() {
           </div>
         </section>
 
+        {/* ========================================== */}
+        {/* 22. FOOTER */}
+        {/* ========================================== */}
         <footer>
           <div className="footer-grid">
             <div className="footer-brand">
@@ -477,6 +551,9 @@ export default function Page() {
         </footer>
       </div>
 
+      {/* ========================================== */}
+      {/* 23. GLOBAL STYLES */}
+      {/* ========================================== */}
       <style jsx global>{`
         @import url("https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,800;1,9..40,400&display=swap");
 
@@ -650,6 +727,7 @@ export default function Page() {
           border: 1px solid rgba(108, 92, 231, 0.3);
           background: rgba(108, 92, 231, 0.08);
           margin-bottom: 32px;
+          min-height: 44px;
         }
 
         .hero-badge-dot {
@@ -660,11 +738,24 @@ export default function Page() {
           animation: pulse 2s ease infinite;
         }
 
-        .hero-badge span {
+        .hero-badge-text {
+          display: inline-block;
           font-size: 13px;
           color: #a29bfe;
           font-weight: 500;
           letter-spacing: 0.5px;
+          transition: opacity 0.25s ease, transform 0.25s ease;
+          will-change: opacity, transform;
+        }
+
+        .hero-badge-text.is-visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+
+        .hero-badge-text.is-hidden {
+          opacity: 0;
+          transform: translateY(8px);
         }
 
         .hero h1 {
