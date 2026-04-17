@@ -460,37 +460,36 @@ export default function Page() {
         </section>
 
         {/* ========================================== */}
-        {/* 20. FAQ */}
-        {/* ========================================== */}
-      <div className="faq-list">
-  {faqs.map((faq, index) => {
-    const isOpen = openFaq === index;
-    return (
-      <div key={faq.q} className={`faq-item ${isOpen ? "open" : ""}`}>
-        <button type="button" className="faq-btn" onClick={() => setOpenFaq(isOpen ? -1 : index)}>
-          <span>{faq.q}</span>
-          <span className="faq-icon">+</span>
-        </button>
-        <div className="faq-answer">
-          <p>{faq.a}</p>
-        </div>
-      </div>
-    );
-  })}
-</div>
-              <div key={faq.q} className={`faq-item ${isOpen ? "open" : ""}`}>
-                  <button type="button" className="faq-btn" onClick={() => setOpenFaq(isOpen ? -1 : index)}>
-                    <span>{faq.q}</span>
-                    <span className="faq-icon">+</span>
-                  </button>
-                  <div className="faq-answer">
-                    <p>{faq.a}</p>
-                  </div>
-                </div>
-              );
-            })}
+  {/* 20. FAQ */}
+{/* ========================================== */}
+<section className="faq" id="faq">
+  <div className="section-center">
+    <div className="section-eyebrow">Domande frequenti</div>
+    <h2 className="section-title">FAQ</h2>
+  </div>
+
+  <div className="faq-list">
+    {faqs.map((faq, index) => {
+      const isOpen = openFaq === index;
+      return (
+        <div key={faq.q} className={`faq-item ${isOpen ? "open" : ""}`}>
+          <button
+            type="button"
+            className="faq-btn"
+            onClick={() => setOpenFaq(isOpen ? -1 : index)}
+          >
+            <span>{faq.q}</span>
+            <span className="faq-icon">+</span>
+          </button>
+
+          <div className="faq-answer">
+            <p>{faq.a}</p>
           </div>
-        </section>
+        </div>
+      );
+    })}
+  </div>
+</section>
 
         {/* ========================================== */}
         {/* 21. CTA */}
