@@ -462,17 +462,23 @@ export default function Page() {
         {/* ========================================== */}
         {/* 20. FAQ */}
         {/* ========================================== */}
-        <section className="faq" id="faq">
-          <div ref={nextRevealRef()} className="section-center fade">
-            <div className="section-eyebrow">Domande frequenti</div>
-            <h2 className="section-title">FAQ</h2>
-          </div>
-
-          <div className="faq-list">
-            {faqs.map((faq, index) => {
-              const isOpen = openFaq === index;
-              return (
-                <div key={faq.q} ref={nextRevealRef()} className={`faq-item fade ${isOpen ? "open" : ""}`}>
+      <div className="faq-list">
+  {faqs.map((faq, index) => {
+    const isOpen = openFaq === index;
+    return (
+      <div key={faq.q} className={`faq-item ${isOpen ? "open" : ""}`}>
+        <button type="button" className="faq-btn" onClick={() => setOpenFaq(isOpen ? -1 : index)}>
+          <span>{faq.q}</span>
+          <span className="faq-icon">+</span>
+        </button>
+        <div className="faq-answer">
+          <p>{faq.a}</p>
+        </div>
+      </div>
+    );
+  })}
+</div>
+              <div key={faq.q} className={`faq-item ${isOpen ? "open" : ""}`}>
                   <button type="button" className="faq-btn" onClick={() => setOpenFaq(isOpen ? -1 : index)}>
                     <span>{faq.q}</span>
                     <span className="faq-icon">+</span>
