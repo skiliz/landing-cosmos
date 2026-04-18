@@ -323,7 +323,7 @@ export default function Page() {
               <span />
             </div>
             <Image
-              src="/1.png"
+              src="/dashboard.jpg"
               alt="Anteprima dashboard UpPilot"
               width={1440}
               height={900}
