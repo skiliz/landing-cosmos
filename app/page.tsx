@@ -3,7 +3,7 @@
 // ==========================================
 // 01. IMPORTS
 // ==========================================
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 // ==========================================
 // 02. TYPES
@@ -50,6 +50,12 @@ export default function Page() {
 
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [phraseVisible, setPhraseVisible] = useState(true);
+  const heroHeadlinePhrases = useMemo(
+    () => ["ADV manager", "Meta publisher", "SMM", "content planner", "AI assistant"],
+    []
+  );
+  const [headlineIndex, setHeadlineIndex] = useState(0);
+  const [headlineVisible, setHeadlineVisible] = useState(true);
 
   // ==========================================
   // 06. REVEAL ANIMATION REFS
@@ -59,6 +65,9 @@ export default function Page() {
   const mediaStageRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const heroMotionFrameRef = useRef<number | null>(null);
+  const headlineLineRef = useRef<HTMLSpanElement | null>(null);
+  const headlineSlotRef = useRef<HTMLSpanElement | null>(null);
+  const headlineSubjectRef = useRef<HTMLSpanElement | null>(null);
 
   const setRevealRef = (index: number) => (el: HTMLElement | null) => {
     revealRefs.current[index] = el;
@@ -364,6 +373,36 @@ export default function Page() {
     return () => clearInterval(interval);
   }, [rotatingPhrases.length]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHeadlineVisible(false);
+
+      setTimeout(() => {
+        setHeadlineIndex((prev) => (prev + 1) % heroHeadlinePhrases.length);
+        setHeadlineVisible(true);
+      }, 240);
+    }, 2600);
+
+    return () => clearInterval(interval);
+  }, [heroHeadlinePhrases.length]);
+
+  useLayoutEffect(() => {
+    const updateHeadlineOffset = () => {
+      if (!headlineLineRef.current || !headlineSlotRef.current || !headlineSubjectRef.current) return;
+
+      const slotWidth = headlineSlotRef.current.offsetWidth;
+      const subjectWidth = headlineSubjectRef.current.offsetWidth;
+      const offset = Math.max((slotWidth - subjectWidth) / 2, 0);
+
+      headlineLineRef.current.style.setProperty("--hero-title-optical-offset", `${offset}px`);
+    };
+
+    updateHeadlineOffset();
+    window.addEventListener("resize", updateHeadlineOffset);
+
+    return () => window.removeEventListener("resize", updateHeadlineOffset);
+  }, [headlineIndex, headlineVisible]);
+
   // ==========================================
   // 13. RENDER
   // ==========================================
@@ -406,10 +445,23 @@ export default function Page() {
             </div>
           </div>
 
-          <h1 ref={nextRevealRef()} className="fade">
-            Il tuo autopilota
-            <br />
-            per i social media
+          <h1 ref={nextRevealRef()} className="fade hero-title">
+            <span ref={headlineLineRef} className="hero-title-line" aria-live="polite">
+              <span className="hero-title-line-content">
+                <span className="hero-title-fixed">Il tuo</span>
+                <span ref={headlineSlotRef} className="hero-title-slot">
+                  <span className="hero-title-dynamic-wrap">
+                    <span
+                      ref={headlineSubjectRef}
+                      className={`hero-title-dynamic ${headlineVisible ? "is-visible" : "is-hidden"}`}
+                    >
+                      {heroHeadlinePhrases[headlineIndex]}
+                    </span>
+                  </span>
+                </span>
+              </span>
+            </span>
+            <span className="hero-title-static">per i social media</span>
           </h1>
 
           <p ref={nextRevealRef()} className="fade">
