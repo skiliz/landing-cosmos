@@ -3,7 +3,6 @@
 // ==========================================
 // 01. IMPORTS
 // ==========================================
-import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 // ==========================================
@@ -56,6 +55,10 @@ export default function Page() {
   // 06. REVEAL ANIMATION REFS
   // ==========================================
   const revealRefs = useRef<(HTMLElement | null)[]>([]);
+  const showcaseRef = useRef<HTMLDivElement | null>(null);
+  const mediaStageRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const heroMotionFrameRef = useRef<number | null>(null);
 
   const setRevealRef = (index: number) => (el: HTMLElement | null) => {
     revealRefs.current[index] = el;
@@ -212,7 +215,7 @@ export default function Page() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -235,6 +238,113 @@ export default function Page() {
     return () => {
       window.removeEventListener("scroll", onScroll);
       observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const updateHeroMotion = () => {
+      if (!showcaseRef.current || !mediaStageRef.current || !videoRef.current) return;
+
+      const root = showcaseRef.current;
+      const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+      const lerp = (start: number, end: number, amount: number) => start + (end - start) * amount;
+      const ease = (value: number) => 1 - Math.pow(1 - value, 3);
+      const smooth = (value: number) => value * value * (3 - 2 * value);
+
+      const isDesktop = window.innerWidth > 768;
+      const stageRect = mediaStageRef.current.getBoundingClientRect();
+      const travel = Math.max(stageRect.height - window.innerHeight, 1);
+      const progress = clamp(-stageRect.top / travel, 0, 1);
+
+      const zoomEnd = 0.22;
+      const holdEnd = 0.82;
+      const zoomPhase = ease(clamp(progress / zoomEnd, 0, 1));
+      const holdPhase = smooth(clamp((progress - zoomEnd) / (holdEnd - zoomEnd), 0, 1));
+      const exitPhase = ease(clamp((progress - holdEnd) / (1 - holdEnd), 0, 1));
+
+      const holdMicroScale = Math.sin(holdPhase * Math.PI) * 0.02;
+      const holdMicroShift = Math.sin(holdPhase * Math.PI) * -10;
+
+      const shift =
+        progress < zoomEnd
+          ? lerp(48, -86, zoomPhase)
+          : progress < holdEnd
+            ? lerp(-86, -112, holdPhase) + holdMicroShift
+            : lerp(-112, -138, exitPhase);
+      const scale =
+        progress < zoomEnd
+          ? lerp(0.9, 1.28, zoomPhase)
+          : progress < holdEnd
+            ? lerp(1.28, 1.34, holdPhase) + holdMicroScale
+            : lerp(1.34, 1.38, exitPhase);
+      const opacity =
+        progress < zoomEnd ? lerp(0.92, 1, zoomPhase) : progress < holdEnd ? 1 : lerp(1, 0.985, exitPhase);
+      const tilt =
+        progress < zoomEnd ? lerp(2.4, 0.2, zoomPhase) : progress < holdEnd ? 0.2 : lerp(0.2, 0, exitPhase);
+      const radius =
+        progress < zoomEnd ? lerp(28, 8, zoomPhase) : progress < holdEnd ? lerp(8, 2, holdPhase) : lerp(2, 0, exitPhase);
+      const glow =
+        progress < zoomEnd ? lerp(0.36, 0.58, zoomPhase) : progress < holdEnd ? 0.58 : lerp(0.58, 0.3, exitPhase);
+      const shadow =
+        progress < zoomEnd ? lerp(0.24, 0.4, zoomPhase) : progress < holdEnd ? 0.4 : lerp(0.4, 0.28, exitPhase);
+      const backdrop =
+        progress < zoomEnd ? lerp(0, 0.26, zoomPhase) : progress < holdEnd ? 0.26 : lerp(0.26, 0.08, exitPhase);
+
+      root.style.setProperty("--hero-video-shift", `${shift}px`);
+      root.style.setProperty("--hero-video-scale", `${scale}`);
+      root.style.setProperty("--hero-video-opacity", `${opacity}`);
+      root.style.setProperty("--hero-video-tilt", `${tilt}deg`);
+      root.style.setProperty("--hero-video-radius", `${radius}px`);
+      root.style.setProperty("--hero-video-glow-opacity", `${glow}`);
+      root.style.setProperty("--hero-video-shadow-strength", `${shadow}`);
+      root.style.setProperty("--hero-video-hold-progress", `${holdPhase}`);
+      root.style.setProperty("--hero-backdrop-opacity", `${backdrop}`);
+
+      const video = videoRef.current;
+      if (!isDesktop) {
+        root.style.setProperty("--hero-video-shift", "0px");
+        root.style.setProperty("--hero-video-scale", "1");
+        root.style.setProperty("--hero-video-opacity", "1");
+        root.style.setProperty("--hero-video-tilt", "0deg");
+        root.style.setProperty("--hero-video-radius", "20px");
+        root.style.setProperty("--hero-video-glow-opacity", "0.18");
+        root.style.setProperty("--hero-video-shadow-strength", "0.22");
+        root.style.setProperty("--hero-video-hold-progress", "0");
+        root.style.setProperty("--hero-backdrop-opacity", "0");
+
+        const playPromise = video.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+          playPromise.catch(() => {});
+        }
+      } else {
+        video.pause();
+        const duration = Number.isFinite(video.duration) && video.duration > 0 ? Math.min(video.duration, 8) : 8;
+        const scrubProgress = clamp((progress - zoomEnd) / (holdEnd - zoomEnd), 0, 1);
+        const targetTime = duration * scrubProgress;
+
+        if (Math.abs(video.currentTime - targetTime) > 0.04) {
+          video.currentTime = targetTime;
+        }
+      }
+
+      heroMotionFrameRef.current = null;
+    };
+
+    const onScroll = () => {
+      if (heroMotionFrameRef.current !== null) return;
+      heroMotionFrameRef.current = window.requestAnimationFrame(updateHeroMotion);
+    };
+
+    updateHeroMotion();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", updateHeroMotion);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", updateHeroMotion);
+      if (heroMotionFrameRef.current !== null) {
+        window.cancelAnimationFrame(heroMotionFrameRef.current);
+      }
     };
   }, []);
 
@@ -286,51 +396,61 @@ export default function Page() {
         <div className="hero-glow1" />
         <div className="hero-glow2" />
 
-        <div ref={nextRevealRef()} className="fade">
-          <div className="hero-badge">
-            <div className="hero-badge-dot" />
-            <span className={`hero-badge-text ${phraseVisible ? "is-visible" : "is-hidden"}`}>
-              {rotatingPhrases[phraseIndex]}
-            </span>
+        <div className="hero-copy">
+          <div ref={nextRevealRef()} className="fade">
+            <div className="hero-badge">
+              <div className="hero-badge-dot" />
+              <span className={`hero-badge-text ${phraseVisible ? "is-visible" : "is-hidden"}`}>
+                {rotatingPhrases[phraseIndex]}
+              </span>
+            </div>
+          </div>
+
+          <h1 ref={nextRevealRef()} className="fade">
+            Il tuo autopilota
+            <br />
+            per i social media
+          </h1>
+
+          <p ref={nextRevealRef()} className="fade">
+            Carica il piano editoriale, importa i media, e UpPilot pubblica tutto in automatico su Instagram e
+            Facebook. Zero passaggi manuali.
+          </p>
+
+          <div ref={nextRevealRef()} className="hero-buttons fade">
+            <a href="#pricing" className="btn-primary">
+              Inizia gratis
+            </a>
+            <a href="#come-funziona" className="btn-secondary">
+              Guarda la demo
+            </a>
           </div>
         </div>
 
-        <h1 ref={nextRevealRef()} className="fade">
-          Il tuo autopilota
-          <br />
-          per i social media
-        </h1>
-
-        <p ref={nextRevealRef()} className="fade">
-          Carica il piano editoriale, importa i media, e UpPilot pubblica tutto in automatico su Instagram e
-          Facebook. Zero passaggi manuali.
-        </p>
-
-        <div ref={nextRevealRef()} className="hero-buttons fade">
-          <a href="#pricing" className="btn-primary">
-            Inizia gratis
-          </a>
-          <a href="#come-funziona" className="btn-secondary">
-            Guarda la demo
-          </a>
-        </div>
-
-        <div ref={nextRevealRef()} className="hero-dashboard-wrap fade">
-          <div className="hero-dashboard">
-            <div className="hero-dashboard-topbar">
-              <span />
-              <span />
-              <span />
+        <div className="hero-showcase" ref={showcaseRef}>
+          <div className="hero-media-stage" ref={mediaStageRef}>
+            <div className="hero-media-backdrop" />
+            <div ref={nextRevealRef()} className="hero-dashboard-wrap fade">
+              <div className="hero-dashboard-sticky">
+                <div className="hero-dashboard-motion">
+                  <div className="hero-dashboard">
+                    <div className="hero-dashboard-topbar">
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                    <video
+                      ref={videoRef}
+                      className="hero-dashboard-video"
+                      src="/hero-demo.mp4"
+                      muted
+                      playsInline
+                      preload="auto"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-            <Image
-              src="/dashboard.jpg"
-              alt="Anteprima dashboard UpPilot"
-              width={1440}
-              height={900}
-              sizes="(max-width: 768px) 100vw, 1120px"
-              priority
-              className="hero-dashboard-image"
-            />
           </div>
         </div>
       </section>
