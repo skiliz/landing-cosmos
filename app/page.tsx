@@ -3,6 +3,7 @@
 // ==========================================
 // 01. IMPORTS
 // ==========================================
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 // ==========================================
@@ -314,22 +315,22 @@ export default function Page() {
           </a>
         </div>
 
-        <div ref={nextRevealRef()} className="hero-stats fade">
-          <div className="stat-item">
-            <div className="stat-value">60s</div>
-            <div className="stat-label">Polling engine</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-value">0</div>
-            <div className="stat-label">Passaggi manuali</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-value">24/7</div>
-            <div className="stat-label">Pubblicazione auto</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-value">∞</div>
-            <div className="stat-label">Post programmabili</div>
+        <div ref={nextRevealRef()} className="hero-dashboard-wrap fade">
+          <div className="hero-dashboard">
+            <div className="hero-dashboard-topbar">
+              <span />
+              <span />
+              <span />
+            </div>
+            <Image
+              src="/1.png"
+              alt="Anteprima dashboard UpPilot"
+              width={1440}
+              height={900}
+              sizes="(max-width: 768px) 100vw, 1120px"
+              priority
+              className="hero-dashboard-image"
+            />
           </div>
         </div>
       </section>
