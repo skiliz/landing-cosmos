@@ -3,6 +3,8 @@
 // ==========================================
 // 01. IMPORTS
 // ==========================================
+import { motion, useScroll, useTransform } from "framer-motion";
+import type { MotionValue } from "framer-motion";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 // ==========================================
@@ -21,6 +23,14 @@ type PricePlan = {
 type FaqItem = {
   q: string;
   a: string;
+};
+
+type FooterProps = {
+  opacity: MotionValue<number>;
+  borderRadius: MotionValue<string>;
+  revealProgress: MotionValue<number>;
+  scale: MotionValue<number>;
+  y: MotionValue<number>;
 };
 
 // ==========================================
@@ -68,6 +78,23 @@ export default function Page() {
   const headlineLineRef = useRef<HTMLSpanElement | null>(null);
   const headlineSlotRef = useRef<HTMLSpanElement | null>(null);
   const headlineSubjectRef = useRef<HTMLSpanElement | null>(null);
+  const footerRevealRef = useRef<HTMLElement | null>(null);
+
+  const { scrollYProgress: footerRevealProgress } = useScroll({
+    target: footerRevealRef,
+    offset: ["start end", "end end"],
+  });
+  const footerSceneProgress = useTransform(footerRevealProgress, (latest) => {
+    const clamped = Math.min(Math.max(latest, 0), 1);
+    const eased = clamped * clamped * (3 - 2 * clamped);
+    const firstSettle = 0.035 * Math.exp(-Math.pow((clamped - 0.32) / 0.085, 2));
+    const secondSettle = 0.045 * Math.exp(-Math.pow((clamped - 0.68) / 0.1, 2));
+    return Math.min(Math.max(eased - firstSettle - secondSettle, 0), 1);
+  });
+  const footerY = useTransform(footerSceneProgress, [0, 0.42, 1], [34, 10, 0]);
+  const footerOpacity = useTransform(footerSceneProgress, [0, 0.28, 1], [0.9, 0.96, 1]);
+  const footerScale = useTransform(footerSceneProgress, [0, 0.5, 1], [0.985, 1, 1]);
+  const footerBorderRadius = useTransform(footerSceneProgress, [0, 0.54, 1], ["30px", "18px", "0px"]);
 
   const setRevealRef = (index: number) => (el: HTMLElement | null) => {
     revealRefs.current[index] = el;
@@ -408,30 +435,32 @@ export default function Page() {
   // ==========================================
   return (
     <div className="uppilot-page">
-      {/* ========================================== */}
-      {/* 14. NAVBAR */}
-      {/* ========================================== */}
-      <nav className={`nav ${scrolled ? "scrolled" : ""}`} id="nav">
-        <div className="nav-logo">
-          <div className="nav-icon">UP</div>
-          <span className="nav-name">UpPilot</span>
-        </div>
+      <motion.main className="page-main">
+        <div className="page-content">
+        {/* ========================================== */}
+        {/* 14. NAVBAR */}
+        {/* ========================================== */}
+        <nav className={`nav ${scrolled ? "scrolled" : ""}`} id="nav">
+          <div className="nav-logo">
+            <div className="nav-icon">UP</div>
+            <span className="nav-name">UpPilot</span>
+          </div>
 
-        <div className="nav-links">
-          <a href="#funzionalita">Funzionalità</a>
-          <a href="#come-funziona">Come funziona</a>
-          <a href="#pricing">Pricing</a>
-          <a href="#faq">FAQ</a>
-          <a href="#pricing" className="nav-cta">
-            Inizia gratis
-          </a>
-        </div>
-      </nav>
+          <div className="nav-links">
+            <a href="#funzionalita">Funzionalità</a>
+            <a href="#come-funziona">Come funziona</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+            <a href="#pricing" className="nav-cta">
+              Inizia gratis
+            </a>
+          </div>
+        </nav>
 
-      {/* ========================================== */}
-      {/* 15. HERO */}
-      {/* ========================================== */}
-      <section className="hero">
+        {/* ========================================== */}
+        {/* 15. HERO */}
+        {/* ========================================== */}
+        <section className="hero">
         <div className="hero-glow1" />
         <div className="hero-glow2" />
 
@@ -505,12 +534,12 @@ export default function Page() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
 
       {/* ========================================== */}
       {/* 16. FEATURES */}
       {/* ========================================== */}
-      <section className="section" id="funzionalita">
+        <section className="section" id="funzionalita">
         <div ref={nextRevealRef()} className="section-center fade">
           <div className="section-eyebrow">Funzionalità</div>
           <h2 className="section-title">
@@ -529,12 +558,12 @@ export default function Page() {
             </div>
           ))}
         </div>
-      </section>
+        </section>
 
       {/* ========================================== */}
       {/* 17. HOW IT WORKS */}
       {/* ========================================== */}
-      <section className="how-section" id="come-funziona">
+        <section className="how-section" id="come-funziona">
         <div className="how-bg" />
         <div className="how-inner">
           <div ref={nextRevealRef()} className="section-center fade">
@@ -553,12 +582,12 @@ export default function Page() {
             ))}
           </div>
         </div>
-      </section>
+        </section>
 
       {/* ========================================== */}
       {/* 18. PRICING */}
       {/* ========================================== */}
-      <section className="section" id="pricing">
+        <section className="section" id="pricing">
         <div ref={nextRevealRef()} className="section-center fade">
           <div className="section-eyebrow">Pricing trasparente</div>
           <h2 className="section-title">Scegli il piano giusto per te</h2>
@@ -618,12 +647,12 @@ export default function Page() {
             Riserva il tuo posto
           </a>
         </div>
-      </section>
+        </section>
 
       {/* ========================================== */}
       {/* 19. TESTIMONIAL */}
       {/* ========================================== */}
-      <section className="testimonial">
+        <section className="testimonial">
         <div ref={nextRevealRef()} className="testimonial-inner fade">
           <div className="testimonial-quote-mark">"</div>
           <blockquote>
@@ -633,12 +662,12 @@ export default function Page() {
           <div className="testimonial-author">Social Media Manager</div>
           <div className="testimonial-role">Agenzia, 8 clienti</div>
         </div>
-      </section>
+        </section>
 
       {/* ========================================== */}
       {/* 20. FAQ */}
       {/* ========================================== */}
-      <section className="faq" id="faq">
+        <section className="faq" id="faq">
         <div className="section-center">
           <div className="section-eyebrow">Domande frequenti</div>
           <h2 className="section-title">FAQ</h2>
@@ -660,12 +689,12 @@ export default function Page() {
             );
           })}
         </div>
-      </section>
+        </section>
 
       {/* ========================================== */}
       {/* 21. CTA */}
       {/* ========================================== */}
-      <section className="cta-section">
+        <section className="cta-section">
         <div ref={nextRevealRef()} className="cta-box fade">
           <div className="cta-glow" />
           <h2>Pronto a mettere il pilota automatico?</h2>
@@ -674,14 +703,51 @@ export default function Page() {
             Crea il tuo account gratuito
           </a>
         </div>
-      </section>
+        </section>
+        </div>
 
-      {/* ========================================== */}
-      {/* 22. FOOTER */}
-      {/* ========================================== */}
-      <footer>
-        <div className="footer-grid">
-          <div className="footer-brand">
+        <section ref={footerRevealRef} className="footer-scene" aria-label="Finale UpPilot">
+          <Footer
+            opacity={footerOpacity}
+            borderRadius={footerBorderRadius}
+            revealProgress={footerSceneProgress}
+            scale={footerScale}
+            y={footerY}
+          />
+
+          <div className="footer-reveal-spacer" aria-hidden="true" />
+        </section>
+      </motion.main>
+    </div>
+  );
+}
+
+function Footer({ opacity, borderRadius, revealProgress, scale, y }: FooterProps) {
+  const panelY = useTransform(revealProgress, [0, 0.34, 0.68, 1], [84, 36, 10, 0]);
+  const panelScale = useTransform(revealProgress, [0, 0.38, 0.72, 1], [0.965, 0.995, 1.018, 1.028]);
+  const brandY = useTransform(revealProgress, [0, 0.45, 1], [58, 22, -8]);
+  const brandOpacity = useTransform(revealProgress, [0, 0.34, 0.78, 1], [0.62, 0.82, 0.96, 1]);
+  const headlineY = useTransform(revealProgress, [0, 0.36, 0.72, 1], [70, 26, -4, -14]);
+  const headlineOpacity = useTransform(revealProgress, [0, 0.3, 0.78, 1], [0.72, 0.9, 0.98, 1]);
+  const ctaY = useTransform(revealProgress, [0, 0.42, 0.78, 1], [82, 34, 8, -2]);
+  const ctaOpacity = useTransform(revealProgress, [0, 0.38, 0.82, 1], [0.62, 0.84, 0.98, 1]);
+  const navigationY = useTransform(revealProgress, [0, 0.48, 0.8, 1], [92, 42, 12, 0]);
+  const navigationOpacity = useTransform(revealProgress, [0, 0.42, 0.84, 1], [0.6, 0.82, 0.98, 1]);
+  const navigationScale = useTransform(revealProgress, [0, 0.5, 0.82, 1], [0.975, 1, 1.018, 1.018]);
+
+  return (
+    <motion.footer
+      className="site-footer"
+      style={{
+        borderRadius,
+        opacity,
+        scale,
+        y,
+      }}
+    >
+      <motion.div className="footer-panel" style={{ scale: panelScale, y: panelY }}>
+        <div className="footer-hero">
+          <motion.div className="footer-brand" style={{ opacity: brandOpacity, y: brandY }}>
             <div className="footer-brand-top">
               <div className="nav-icon footer-icon">UP</div>
               <span className="footer-brand-name">UpPilot</span>
@@ -691,9 +757,44 @@ export default function Page() {
               automatico.
             </p>
             <a href="mailto:info@uppilot.com">info@uppilot.com</a>
-          </div>
+            <div className="footer-social-row" aria-label="Social links">
+              <a href="#" aria-label="Instagram">
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6Zm5.15-2.32a1.12 1.12 0 1 1 0 2.24 1.12 1.12 0 0 1 0-2.24Z" />
+                </svg>
+              </a>
+              <a href="#" aria-label="LinkedIn">
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M5.2 8.9h3.35V20H5.2V8.9Zm1.68-5.4a1.94 1.94 0 1 1 0 3.88 1.94 1.94 0 0 1 0-3.88ZM10.55 8.9h3.2v1.52h.05c.45-.86 1.55-1.77 3.2-1.77 3.42 0 4.05 2.25 4.05 5.18V20H17.7v-5.47c0-1.3-.02-2.98-1.82-2.98-1.82 0-2.1 1.42-2.1 2.9V20h-3.23V8.9Z" />
+                </svg>
+              </a>
+              <a href="#" aria-label="Twitter">
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M13.9 10.47 21.35 2h-1.77l-6.47 7.36L7.95 2H2l7.82 11.16L2 22h1.77l6.83-7.76L16.05 22H22l-8.1-11.53Zm-2.42 2.75-.79-1.1L4.39 3.31h2.71l5.08 7.11.79 1.1 6.61 9.25h-2.71l-5.39-7.55Z" />
+                </svg>
+              </a>
+              <a href="#" aria-label="TikTok">
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M15.62 2c.34 2.72 1.86 4.35 4.5 4.52v3.04a7.7 7.7 0 0 1-4.42-1.38v6.75c0 3.42-2.28 6.07-5.86 6.07-3.17 0-5.96-2.05-5.96-5.58 0-3.86 3.4-6.07 6.98-5.43v3.18c-1.62-.5-3.74.34-3.74 2.19 0 1.52 1.3 2.4 2.72 2.4 1.64 0 2.55-.97 2.55-2.84V2h3.23Z" />
+                </svg>
+              </a>
+            </div>
+          </motion.div>
 
+          <div className="footer-statement">
+            <span>Final destination</span>
+            <motion.h2 style={{ opacity: headlineOpacity, y: headlineY }}>
+              Entra nel workflow che pubblica da solo.
+            </motion.h2>
+            <motion.a href="#pricing" className="footer-primary-link" style={{ opacity: ctaOpacity, y: ctaY }}>
+              Inizia gratis
+            </motion.a>
+          </div>
+        </div>
+
+        <motion.div className="footer-grid" style={{ opacity: navigationOpacity, scale: navigationScale, y: navigationY }}>
           <div className="footer-col">
+            <span className="footer-card-index">01</span>
             <h5>Prodotto</h5>
             <a href="#">Funzionalità</a>
             <a href="#">Pricing</a>
@@ -702,20 +803,14 @@ export default function Page() {
           </div>
 
           <div className="footer-col">
+            <span className="footer-card-index">02</span>
             <h5>Azienda</h5>
             <a href="#">Chi siamo</a>
             <a href="#">Blog</a>
             <a href="#">Contatti</a>
             <a href="#">Lavora con noi</a>
           </div>
-
-          <div className="footer-col">
-            <h5>Social</h5>
-            <a href="#">Instagram</a>
-            <a href="#">LinkedIn</a>
-            <a href="#">Twitter</a>
-          </div>
-        </div>
+        </motion.div>
 
         <div className="footer-bottom">
           <span>© 2026 UpPilot. Tutti i diritti riservati.</span>
@@ -724,7 +819,7 @@ export default function Page() {
             <a href="#">Termini</a>
           </div>
         </div>
-      </footer>
-    </div>
+      </motion.div>
+    </motion.footer>
   );
 }

@@ -66,9 +66,58 @@ a {
 /* BASE */
 /* ========================================== */
 .uppilot-page {
+  --footer-panel-height: 100svh;
+  --footer-reveal-height: clamp(980px, 150svh, 1420px);
   background: transparent;
   color: #fff;
   min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+}
+
+.page-main {
+  position: relative;
+  z-index: 2;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.page-content {
+  position: relative;
+  z-index: 2;
+  background:
+    radial-gradient(circle at top, rgba(108, 92, 231, 0.06), transparent 26%),
+    linear-gradient(180deg, #0a0a12 0%, #090910 100%);
+  transform: translate3d(0, 0, 0);
+}
+
+.footer-scene {
+  position: relative;
+  z-index: 1;
+  min-height: calc(var(--footer-panel-height) + var(--footer-reveal-height));
+  background:
+    linear-gradient(180deg, #090910 0%, #07070d 22%, #050507 100%);
+  isolation: isolate;
+  overflow: visible;
+}
+
+.footer-scene::before {
+  content: "";
+  position: absolute;
+  inset: -160px 0 auto;
+  height: 260px;
+  background: linear-gradient(180deg, rgba(9, 9, 16, 0), #050507 72%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.footer-reveal-spacer {
+  height: var(--footer-reveal-height);
+  pointer-events: none;
+  user-select: none;
+  position: relative;
+  z-index: 0;
+  background: transparent;
 }
 
 /* ========================================== */
@@ -1286,17 +1335,134 @@ a {
 /* ========================================== */
 /* FOOTER */
 /* ========================================== */
-footer {
-  padding: 64px 32px 32px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+.site-footer {
+  padding: clamp(48px, 7vw, 86px) 32px max(66px, calc(44px + env(safe-area-inset-bottom)));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-height: var(--footer-panel-height);
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background:
+    linear-gradient(180deg, #101025 0%, #090914 34%, #050507 100%),
+    linear-gradient(135deg, rgba(108, 92, 231, 0.2) 0%, rgba(108, 92, 231, 0) 38%);
+  transform: translate3d(0, 0, 0);
+  transform-origin: center bottom;
+  will-change: transform, opacity, border-radius;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  contain: paint;
+  overflow: hidden;
+  pointer-events: auto;
+  user-select: text;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 -18px 44px rgba(0, 0, 0, 0.34);
+}
+
+.footer-panel {
+  width: min(1240px, 100%);
+  margin: 0 auto;
+  padding-bottom: 10px;
+  position: relative;
+  z-index: 1;
+  transform: translate3d(0, 0, 0);
+  transform-origin: center center;
+  will-change: transform;
+  pointer-events: auto;
+  user-select: text;
+}
+
+.footer-brand,
+.footer-statement h2,
+.footer-primary-link,
+.footer-col {
+  transform: translate3d(0, 0, 0);
+  will-change: transform, opacity;
+}
+
+.footer-hero {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(380px, 1.55fr);
+  gap: clamp(44px, 8vw, 96px);
+  align-items: center;
+  margin-bottom: clamp(48px, 7vw, 84px);
+}
+
+.footer-statement {
+  text-align: right;
+}
+
+.footer-statement span {
+  display: inline-block;
+  font-size: 12px;
+  color: #a29bfe;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.footer-statement h2 {
+  font-size: clamp(52px, 9vw, 128px);
+  line-height: 0.86;
+  letter-spacing: -6px;
+  font-weight: 900;
+  max-width: 880px;
+  margin-left: auto;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, #fff 0%, #c7c2ff 46%, #6f99ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.footer-primary-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 28px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7a5cff, #6c5ce7 52%, #5f7cff);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    0 14px 32px rgba(108, 92, 231, 0.24);
 }
 
 .footer-grid {
-  max-width: 1200px;
-  margin: 0 auto 48px;
+  max-width: none;
+  margin: 0 0 44px auto;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 48px;
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+  gap: 16px;
+  width: min(560px, 100%);
+}
+
+.footer-col {
+  min-height: 210px;
+  padding: 22px;
+  border-radius: 24px;
+  background: #10101c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 26px rgba(0, 0, 0, 0.18);
+}
+
+.footer-card-index {
+  display: block;
+  color: rgba(162, 155, 254, 0.5);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin-bottom: 30px;
 }
 
 .footer-brand-top {
@@ -1321,7 +1487,7 @@ footer {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.35);
   line-height: 1.7;
-  max-width: 280px;
+  max-width: 320px;
   margin-top: 12px;
 }
 
@@ -1332,19 +1498,56 @@ footer {
   margin-top: 8px;
 }
 
+.footer-social-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.footer-social-row a {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  background: #10101c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.footer-social-row svg {
+  width: 17px;
+  height: 17px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.footer-social-row a:hover {
+  color: #fff;
+  border-color: rgba(162, 155, 254, 0.28);
+  transform: translateY(-1px);
+}
+
 .footer-col h5 {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .footer-col a {
   display: block;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.4);
-  margin-bottom: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.52);
+  margin-bottom: 12px;
   transition: color 0.2s;
 }
 
@@ -1353,10 +1556,11 @@ footer {
 }
 
 .footer-bottom {
-  max-width: 1200px;
+  max-width: none;
   margin: 0 auto;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   padding-top: 24px;
+  padding-bottom: 6px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1373,6 +1577,10 @@ footer {
 /* RESPONSIVE */
 /* ========================================== */
 @media (max-width: 768px) {
+  .uppilot-page {
+    --footer-reveal-height: clamp(900px, 135svh, 1260px);
+  }
+
   .hero {
     min-height: auto;
     padding: 112px 24px 96px;
@@ -1387,7 +1595,39 @@ footer {
   }
 
   .footer-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    width: 100%;
+  }
+
+  .footer-reveal-spacer {
+    height: var(--footer-reveal-height);
+  }
+
+  .site-footer {
+    min-height: var(--footer-panel-height);
+    padding: 56px 24px max(64px, calc(40px + env(safe-area-inset-bottom)));
+  }
+
+  .footer-hero {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    margin-bottom: 56px;
+  }
+
+  .footer-statement {
+    text-align: left;
+  }
+
+  .footer-statement h2 {
+    letter-spacing: -3px;
+    max-width: 680px;
+  }
+
+  .footer-col {
+    min-height: 190px;
+    padding: 18px;
+    border-radius: 20px;
   }
 
   .hero-media-stage {
@@ -1458,6 +1698,11 @@ footer {
 }
 
 @media (max-width: 560px) {
+  .uppilot-page {
+    --footer-panel-height: 100svh;
+    --footer-reveal-height: 980px;
+  }
+
   .hero {
     min-height: auto;
     padding: 108px 20px 72px;
@@ -1508,7 +1753,35 @@ footer {
 
   .footer-grid {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .footer-reveal-spacer {
+    height: var(--footer-reveal-height);
+  }
+
+  .site-footer {
+    min-height: 100svh;
+    padding: 52px 20px max(70px, calc(44px + env(safe-area-inset-bottom)));
+  }
+
+  .footer-hero {
     gap: 32px;
+    margin-bottom: 44px;
+  }
+
+  .footer-statement h2 {
+    font-size: clamp(42px, 15vw, 68px);
+    letter-spacing: -2.8px;
+  }
+
+  .footer-col {
+    min-height: auto;
+    padding: 18px;
+  }
+
+  .footer-card-index {
+    margin-bottom: 18px;
   }
 
   .footer-bottom {
