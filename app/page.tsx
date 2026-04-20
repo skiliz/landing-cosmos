@@ -6,6 +6,7 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import type { MotionValue } from "framer-motion";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import ProductJourneySection from "./ProductJourneySection";
 
 // ==========================================
 // 02. TYPES
@@ -107,70 +108,7 @@ export default function Page() {
   };
 
   // ==========================================
-  // 07. CONTENT - FEATURES
-  // ==========================================
-  const features = useMemo(
-    () => [
-      {
-        icon: "📤",
-        title: "Auto-publish",
-        text: "Importa un CSV con il piano editoriale, carica i media con naming convention, e il sistema pubblica tutto automaticamente su IG e FB quando programmato.",
-      },
-      {
-        icon: "🤖",
-        title: "AI Studio",
-        text: "Claude AI integrato genera caption, piani editoriali completi, e analizza i competitor. Knowledge base persistente per ogni brand.",
-      },
-      {
-        icon: "📱",
-        title: "WhatsApp alerts",
-        text: "Notifiche WhatsApp per conferme di pubblicazione, errori, e scadenze token. In Italia WhatsApp è il canale business #1.",
-      },
-      {
-        icon: "👁️",
-        title: "Anteprima fedele",
-        text: "Visualizza esattamente come apparirà il post su Instagram e Facebook prima di pubblicare. Mockup fedeli al layout 2026.",
-      },
-      {
-        icon: "✅",
-        title: "Approvazione cliente",
-        text: "Link tokenizzato senza login: il cliente vede il piano, approva o rifiuta, riceve notifiche. Zero account da creare.",
-      },
-      {
-        icon: "📊",
-        title: "Analisi competitor",
-        text: "Inserisci 2-3 account competitor e l'AI li analizza: cosa pubblicano, quando, con che risultati. Strategia basata sui dati.",
-      },
-    ],
-    []
-  );
-
-  // ==========================================
-  // 08. CONTENT - HOW IT WORKS
-  // ==========================================
-  const steps = useMemo(
-    () => [
-      {
-        number: "01",
-        title: "Carica il piano",
-        text: "Importa il tuo piano editoriale da CSV o Google Sheets. Ogni riga è un post con data, ora, caption e nome file media.",
-      },
-      {
-        number: "02",
-        title: "Carica i media",
-        text: "Upload della cartella media su Cloudinary. I file vengono abbinati automaticamente ai post tramite naming convention.",
-      },
-      {
-        number: "03",
-        title: "Si pubblica da solo",
-        text: "Il motore di pubblicazione controlla ogni 60 secondi e pubblica automaticamente su Instagram e Facebook all'orario programmato.",
-      },
-    ],
-    []
-  );
-
-  // ==========================================
-  // 09. CONTENT - PRICING
+  // 07. CONTENT - PRICING
   // ==========================================
   const pricing: PricePlan[] = useMemo(
     () => [
@@ -217,7 +155,7 @@ export default function Page() {
   );
 
   // ==========================================
-  // 10. CONTENT - FAQ
+  // 08. CONTENT - FAQ
   // ==========================================
   const faqs: FaqItem[] = useMemo(
     () => [
@@ -246,7 +184,7 @@ export default function Page() {
   );
 
   // ==========================================
-  // 11. EFFECT - NAV SCROLL + REVEAL ON SCROLL
+  // 09. EFFECT - NAV SCROLL + REVEAL ON SCROLL
   // ==========================================
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -385,7 +323,7 @@ export default function Page() {
   }, []);
 
   // ==========================================
-  // 12. EFFECT - HERO BADGE TEXT ROTATION
+  // 10. EFFECT - HERO BADGE TEXT ROTATION
   // ==========================================
   useEffect(() => {
     const interval = setInterval(() => {
@@ -431,7 +369,7 @@ export default function Page() {
   }, [headlineIndex, headlineVisible]);
 
   // ==========================================
-  // 13. RENDER
+  // 11. RENDER
   // ==========================================
   return (
     <div className="uppilot-page">
@@ -440,7 +378,7 @@ export default function Page() {
         {/* ========================================== */}
         {/* 14. NAVBAR */}
         {/* ========================================== */}
-        <nav className={`nav ${scrolled ? "scrolled" : ""}`} id="nav">
+        <nav className={`nav ${scrolled ? "scrolled" : ""}`} id="nav" aria-label="Navigazione principale">
           <div className="nav-logo">
             <div className="nav-icon">UP</div>
             <span className="nav-name">UpPilot</span>
@@ -449,10 +387,13 @@ export default function Page() {
           <div className="nav-links">
             <a href="#funzionalita">Funzionalità</a>
             <a href="#come-funziona">Come funziona</a>
-            <a href="#pricing">Pricing</a>
+            <a href="#pricing">Prezzi</a>
             <a href="#faq">FAQ</a>
+          </div>
+
+          <div className="nav-actions">
             <a href="#pricing" className="nav-cta">
-              Inizia gratis
+              Prova UpPilot
             </a>
           </div>
         </nav>
@@ -537,55 +478,12 @@ export default function Page() {
         </section>
 
       {/* ========================================== */}
-      {/* 16. FEATURES */}
+      {/* 16. PRODUCT JOURNEY */}
       {/* ========================================== */}
-        <section className="section" id="funzionalita">
-        <div ref={nextRevealRef()} className="section-center fade">
-          <div className="section-eyebrow">Funzionalità</div>
-          <h2 className="section-title">
-            Tutto quello che serve,
-            <br />
-            niente di superfluo
-          </h2>
-        </div>
-
-        <div className="features-grid">
-          {features.map((feature) => (
-            <div key={feature.title} ref={nextRevealRef()} className="feature-card fade">
-              <div className="feature-icon">{feature.icon}</div>
-              <h3>{feature.title}</h3>
-              <p>{feature.text}</p>
-            </div>
-          ))}
-        </div>
-        </section>
+        <ProductJourneySection />
 
       {/* ========================================== */}
-      {/* 17. HOW IT WORKS */}
-      {/* ========================================== */}
-        <section className="how-section" id="come-funziona">
-        <div className="how-bg" />
-        <div className="how-inner">
-          <div ref={nextRevealRef()} className="section-center fade">
-            <div className="section-eyebrow">Come funziona</div>
-            <h2 className="section-title">Tre passi. Poi lavora da solo.</h2>
-          </div>
-
-          <div className="how-grid">
-            {steps.map((step) => (
-              <div key={step.number} ref={nextRevealRef()} className="how-card fade">
-                <div className="how-card-num">{step.number}</div>
-                <div className="how-card-badge">{step.number}</div>
-                <h3>{step.title}</h3>
-                <p>{step.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        </section>
-
-      {/* ========================================== */}
-      {/* 18. PRICING */}
+      {/* 17. PRICING */}
       {/* ========================================== */}
         <section className="section" id="pricing">
         <div ref={nextRevealRef()} className="section-center fade">
@@ -650,11 +548,11 @@ export default function Page() {
         </section>
 
       {/* ========================================== */}
-      {/* 19. TESTIMONIAL */}
+      {/* 18. TESTIMONIAL */}
       {/* ========================================== */}
         <section className="testimonial">
         <div ref={nextRevealRef()} className="testimonial-inner fade">
-          <div className="testimonial-quote-mark">"</div>
+          <div className="testimonial-quote-mark">&quot;</div>
           <blockquote>
             Con UpPilot ho eliminato 3 ore al giorno di lavoro manuale. Carico il piano editoriale il lunedì e per
             tutta la settimana si pubblica da solo.
@@ -665,7 +563,7 @@ export default function Page() {
         </section>
 
       {/* ========================================== */}
-      {/* 20. FAQ */}
+      {/* 19. FAQ */}
       {/* ========================================== */}
         <section className="faq" id="faq">
         <div className="section-center">
@@ -692,7 +590,7 @@ export default function Page() {
         </section>
 
       {/* ========================================== */}
-      {/* 21. CTA */}
+      {/* 20. CTA */}
       {/* ========================================== */}
         <section className="cta-section">
         <div ref={nextRevealRef()} className="cta-box fade">
