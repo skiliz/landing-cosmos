@@ -4788,13 +4788,16 @@ a {
 .pricing-section .pricing-stage .price-card.highlight.is-neutral .price-card-inner {
   transform: scale(0.92);
   padding: 30px;
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.045);
   background:
-    radial-gradient(circle at 50% 0%, rgba(122, 92, 255, 0.1), transparent 42%),
+    radial-gradient(circle at 50% 0%, rgba(122, 92, 255, 0.055), transparent 42%),
     linear-gradient(180deg, rgba(23, 24, 34, 0.86), rgba(12, 13, 20, 0.96));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 14px 32px rgba(0, 0, 0, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.pricing-section .pricing-stage .price-card:not(.is-focused):not(:hover) .price-card-inner {
+  outline: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .pricing-section .pricing-stage.is-hover-previewing .price-card.is-neutral {
@@ -4851,5 +4854,639 @@ a {
   .pricing-section .pricing-stage.is-hover-previewing .price-card.is-focused .price-card-inner {
     transform: scale(1.02);
     padding: 30px;
+  }
+}
+
+/* ========================================== */
+/* LANDING RESPONSIVE REFINEMENT PASS */
+/* ========================================== */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.uppilot-page {
+  overflow-x: clip;
+}
+
+.section,
+.pricing-section,
+.faq,
+.cta-section,
+.testimonial,
+.journey-section {
+  scroll-margin-top: 110px;
+}
+
+.btn-primary,
+.btn-secondary,
+.nav-cta,
+.footer-primary-link,
+.price-cta,
+.faq-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (min-width: 1440px) {
+  .nav {
+    width: min(calc(100% - 72px), 1180px);
+  }
+
+  .hero h1.hero-title {
+    max-width: 900px;
+  }
+
+  .hero-dashboard-motion {
+    width: min(1240px, calc(100vw - 96px));
+  }
+
+  .journey-shell {
+    max-width: 1240px;
+  }
+
+  .pricing-section {
+    max-width: 1280px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .section,
+  .pricing-section,
+  .faq,
+  .cta-section,
+  .testimonial {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  .hero h1 {
+    font-size: clamp(42px, 6vw, 64px);
+  }
+
+  .hero-dashboard-motion {
+    width: min(1060px, calc(100vw - 48px));
+  }
+
+  .footer-hero {
+    grid-template-columns: minmax(240px, 0.7fr) minmax(0, 1.3fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .nav {
+    width: min(calc(100% - 36px), 980px);
+    grid-template-columns: minmax(150px, 0.6fr) auto minmax(180px, 0.6fr);
+    gap: 12px;
+  }
+
+  .nav-links {
+    gap: 4px;
+  }
+
+  .nav-links a {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .hero {
+    padding-top: 118px;
+  }
+
+  .hero-showcase {
+    margin-top: 72px;
+  }
+
+  .hero-media-stage {
+    height: 480svh;
+  }
+
+  .section-title,
+  .pricing-section .section-title {
+    font-size: clamp(32px, 5vw, 44px);
+  }
+
+  .testimonial {
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+}
+
+@media (max-width: 860px) {
+  .section,
+  .pricing-section,
+  .faq,
+  .cta-section,
+  .testimonial {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .nav {
+    top: 14px;
+    width: min(calc(100% - 24px), 720px);
+    height: 58px;
+    padding: 7px 8px 7px 12px;
+  }
+
+  .nav-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .nav-cta {
+    min-height: 38px;
+    padding: 0 16px;
+  }
+
+  .hero {
+    padding: 104px 22px 0;
+  }
+
+  .hero-badge {
+    max-width: 100%;
+    min-height: 42px;
+    margin-bottom: 26px;
+    padding: 9px 16px;
+  }
+
+  .hero h1 {
+    font-size: clamp(38px, 9vw, 56px);
+    line-height: 1.02;
+    letter-spacing: -1.9px;
+    margin-bottom: 20px;
+  }
+
+  .hero p {
+    max-width: 520px;
+    font-size: 16px;
+    line-height: 1.68;
+    margin-bottom: 30px;
+  }
+
+  .hero-buttons {
+    gap: 12px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    min-height: 50px;
+    padding: 14px 26px;
+  }
+
+  .hero-showcase {
+    margin-top: 52px;
+  }
+
+  .hero-media-stage {
+    height: 360svh;
+  }
+
+  .hero-dashboard-motion {
+    width: min(760px, calc(100vw - 28px));
+  }
+
+  .hero-dashboard-video {
+    aspect-ratio: 4 / 3;
+  }
+
+  .journey-section {
+    padding-top: 92px;
+    padding-bottom: 96px;
+  }
+
+  .journey-intro {
+    margin-bottom: 64px;
+  }
+
+  .journey-steps {
+    gap: 72px;
+  }
+
+  .journey-step,
+  .journey-step.is-reversed {
+    min-height: auto;
+    row-gap: 24px;
+  }
+
+  .journey-copy,
+  .journey-step.is-reversed .journey-copy {
+    max-width: 620px;
+  }
+
+  .pricing-section {
+    padding-top: 92px;
+    padding-bottom: 92px;
+  }
+
+  .pricing-section .section-center {
+    margin-bottom: 34px;
+  }
+
+  .pricing-controls {
+    gap: 10px;
+  }
+
+  .pricing-section .pricing-stage {
+    gap: 16px;
+  }
+
+  .pricing-section .pricing-stage .price-card-inner {
+    min-height: auto;
+  }
+
+  .pricing-section .founding-banner {
+    margin-top: 28px;
+    align-items: flex-start;
+  }
+
+  .faq {
+    padding-top: 76px;
+    padding-bottom: 76px;
+  }
+
+  .cta-section {
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+
+  .cta-box {
+    padding: 44px 28px;
+    border-radius: 24px;
+  }
+
+  .footer-hero {
+    grid-template-columns: 1fr;
+    gap: 34px;
+    align-items: start;
+  }
+
+  .footer-statement {
+    text-align: left;
+  }
+
+  .footer-statement h2 {
+    margin-left: 0;
+    letter-spacing: -3px;
+    font-size: clamp(46px, 12vw, 82px);
+  }
+
+  .footer-grid {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .section,
+  .pricing-section,
+  .faq,
+  .cta-section,
+  .testimonial {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .nav {
+    top: 10px;
+    width: calc(100% - 20px);
+    height: 60px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 7px 8px 7px 10px;
+  }
+
+  .nav-logo {
+    gap: 8px;
+  }
+
+  .nav-name {
+    font-size: 15px;
+  }
+
+  .nav-actions {
+    justify-self: end;
+  }
+
+  .nav-cta {
+    min-height: 44px;
+    padding: 0 13px;
+    font-size: 12px;
+  }
+
+  .hero {
+    padding: 92px 18px 0;
+  }
+
+  .hero-glow1 {
+    width: 420px;
+    height: 420px;
+  }
+
+  .hero-glow2 {
+    display: none;
+  }
+
+  .hero-badge {
+    width: 100%;
+    max-width: 340px;
+    justify-content: center;
+    margin-bottom: 22px;
+  }
+
+  .hero-badge-text {
+    font-size: 12px;
+  }
+
+  .hero h1 {
+    font-size: clamp(34px, 10.5vw, 44px);
+    letter-spacing: -1.5px;
+  }
+
+  .hero-title {
+    width: 100%;
+    max-width: 360px;
+    gap: 0.06em;
+  }
+
+  .hero-title-line {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .hero-title-line-content {
+    grid-template-columns: 1fr;
+    gap: 0.02em;
+    transform: none;
+    text-align: center;
+  }
+
+  .hero-title-fixed,
+  .hero-title-slot,
+  .hero-title-dynamic-wrap {
+    justify-self: center;
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero-title-slot {
+    min-height: 1.05em;
+  }
+
+  .hero-title-static {
+    margin-top: 0.02em;
+  }
+
+  .hero p {
+    font-size: 15px;
+    line-height: 1.65;
+    margin-bottom: 24px;
+  }
+
+  .hero-buttons {
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .hero-buttons .btn-primary,
+  .hero-buttons .btn-secondary {
+    width: 100%;
+  }
+
+  .hero-showcase {
+    margin-top: 42px;
+  }
+
+  .hero-media-stage {
+    height: 260svh;
+  }
+
+  .hero-dashboard-motion {
+    width: calc(100vw - 24px);
+  }
+
+  .hero-dashboard {
+    border-radius: 18px;
+  }
+
+  .hero-dashboard-topbar {
+    height: 34px;
+    padding: 0 14px;
+  }
+
+  .section-title,
+  .pricing-section .section-title,
+  .cta-box h2 {
+    font-size: clamp(28px, 8vw, 36px);
+    line-height: 1.08;
+    letter-spacing: -1.2px;
+  }
+
+  .section-center {
+    margin-bottom: 38px;
+  }
+
+  .journey-section {
+    padding: 78px 18px 84px;
+  }
+
+  .journey-intro {
+    margin-bottom: 48px;
+  }
+
+  .journey-intro h2 {
+    font-size: clamp(32px, 10vw, 42px);
+    letter-spacing: -1.5px;
+  }
+
+  .journey-steps {
+    gap: 56px;
+  }
+
+  .journey-step,
+  .journey-step.is-reversed {
+    padding-left: 38px;
+  }
+
+  .journey-step h3 {
+    font-size: clamp(25px, 8vw, 34px);
+  }
+
+  .journey-mockup-card,
+  .journey-step.is-reversed .journey-mockup-card,
+  .journey-step-01 .journey-mockup-card,
+  .journey-step-03 .journey-mockup-card,
+  .journey-step-05 .journey-mockup-card,
+  .journey-step-07 .journey-mockup-card {
+    width: 100%;
+    min-height: 300px;
+    border-radius: 20px;
+  }
+
+  .pricing-section {
+    padding: 78px 18px;
+  }
+
+  .pricing-section .section-copy {
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .pricing-controls {
+    margin-top: 26px;
+  }
+
+  .pricing-section .pricing-segment button,
+  .pricing-section .pricing-toggle button {
+    min-height: 44px;
+    font-size: 12px;
+  }
+
+  .pricing-section .pricing-stage {
+    width: 100%;
+    gap: 14px;
+  }
+
+  .pricing-section .pricing-stage .price-card-inner {
+    padding: 24px;
+    border-radius: 22px;
+  }
+
+  .pricing-section .price-amount span:first-child {
+    font-size: 44px;
+  }
+
+  .pricing-section .price-description {
+    font-size: 13px;
+  }
+
+  .pricing-section .price-feature {
+    font-size: 13px;
+  }
+
+  .pricing-section .founding-banner {
+    padding: 22px;
+    border-radius: 22px;
+    text-align: left;
+  }
+
+  .founding-btn {
+    width: 100%;
+  }
+
+  .testimonial {
+    padding-top: 64px;
+    padding-bottom: 64px;
+  }
+
+  .testimonial-quote-mark {
+    font-size: 60px;
+  }
+
+  .testimonial blockquote {
+    font-size: 18px;
+    line-height: 1.65;
+  }
+
+  .faq {
+    padding-top: 68px;
+    padding-bottom: 68px;
+  }
+
+  .faq-btn {
+    min-height: 58px;
+    padding: 18px 18px;
+  }
+
+  .faq-answer p {
+    padding: 0 18px 18px;
+  }
+
+  .cta-box {
+    padding: 38px 22px;
+  }
+
+  .cta-box p {
+    font-size: 15px;
+  }
+
+  .site-footer {
+    padding: 48px 18px max(68px, calc(42px + env(safe-area-inset-bottom)));
+  }
+
+  .footer-statement h2 {
+    font-size: clamp(40px, 14vw, 58px);
+    letter-spacing: -2.2px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .footer-col {
+    min-height: auto;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 390px) {
+  .nav-name {
+    display: none;
+  }
+
+  .nav {
+    grid-template-columns: auto auto;
+  }
+
+  .nav-cta {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .hero h1 {
+    font-size: clamp(32px, 10vw, 40px);
+  }
+
+  .hero-badge {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .pricing-section .pricing-segment button,
+  .pricing-section .pricing-toggle button {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .pricing-section .pricing-stage {
+    overflow: visible;
+  }
+
+  .pricing-section .pricing-stage.is-hover-previewing .price-card.is-neutral,
+  .pricing-section .pricing-stage .price-card.is-neutral {
+    opacity: 1;
+    filter: none;
+  }
+
+  .pricing-section .pricing-stage .price-card.is-neutral .price-card-inner,
+  .pricing-section .pricing-stage .price-card.highlight.is-neutral .price-card-inner,
+  .pricing-section .pricing-stage.is-hover-previewing .price-card.is-neutral .price-card-inner {
+    transform: scale(1);
+  }
+
+  .pricing-section .pricing-stage .price-card.is-focused .price-card-inner,
+  .pricing-section .pricing-stage .price-card:hover .price-card-inner,
+  .pricing-section .pricing-stage.is-hover-previewing .price-card.is-focused .price-card-inner {
+    transform: scale(1);
+  }
+
+  .hero-dashboard:hover,
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .nav-cta:hover,
+  .footer-primary-link:hover {
+    transform: none;
   }
 }
