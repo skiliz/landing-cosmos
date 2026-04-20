@@ -13,13 +13,17 @@ import ProductJourneySection from "./ProductJourneySection";
 // ==========================================
 type PricePlan = {
   name: string;
+  description: string;
   monthly: number;
   yearly?: number;
   suffix?: string;
   features: string[];
   highlighted?: boolean;
+  badge?: string;
   cta: string;
 };
+
+type PricingCategory = "creator" | "agency";
 
 type FaqItem = {
   q: string;
@@ -43,6 +47,8 @@ export default function Page() {
   // ==========================================
   const [scrolled, setScrolled] = useState(false);
   const [annual, setAnnual] = useState(false);
+  const [pricingCategory, setPricingCategory] = useState<PricingCategory>("creator");
+  const [hoveredPricingPlan, setHoveredPricingPlan] = useState<number | null>(null);
   const [openFaq, setOpenFaq] = useState(0);
 
   // ==========================================
@@ -66,7 +72,7 @@ export default function Page() {
     []
   );
   const [headlineIndex, setHeadlineIndex] = useState(0);
-  const [headlineVisible, setHeadlineVisible] = useState(true);
+  const [typedHeadline, setTypedHeadline] = useState("");
 
   // ==========================================
   // 06. REVEAL ANIMATION REFS
@@ -76,9 +82,11 @@ export default function Page() {
   const mediaStageRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const heroMotionFrameRef = useRef<number | null>(null);
+  const pricingHoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const headlineLineRef = useRef<HTMLSpanElement | null>(null);
   const headlineSlotRef = useRef<HTMLSpanElement | null>(null);
   const headlineSubjectRef = useRef<HTMLSpanElement | null>(null);
+  const headlineMeasureRef = useRef<HTMLSpanElement | null>(null);
   const footerRevealRef = useRef<HTMLElement | null>(null);
 
   const { scrollYProgress: footerRevealProgress } = useScroll({
@@ -110,49 +118,140 @@ export default function Page() {
   // ==========================================
   // 07. CONTENT - PRICING
   // ==========================================
-  const pricing: PricePlan[] = useMemo(
-    () => [
-      {
-        name: "Free",
-        monthly: 0,
-        suffix: "/mese",
-        features: ["1 cliente", "30 post/mese", "Calendario", "Anteprima IG/FB", "Import CSV"],
-        cta: "Inizia gratis",
-      },
-      {
-        name: "Pro",
-        monthly: 29,
-        yearly: 23,
-        suffix: "/mese",
-        features: [
-          "3 clienti",
-          "Post illimitati",
-          "WhatsApp alerts",
-          "AI Studio (100 crediti)",
-          "Approvazione cliente",
-          "Analisi competitor",
-        ],
-        highlighted: true,
-        cta: "Prova Pro",
-      },
-      {
-        name: "Agency",
-        monthly: 59,
-        yearly: 47,
-        suffix: "/mese",
-        features: [
-          "10 clienti",
-          "Post illimitati",
-          "AI Studio (500 crediti)",
-          "Calendario condiviso",
-          "Google Sheets sync",
-          "Supporto prioritario",
-        ],
-        cta: "Contattaci",
-      },
-    ],
+  const pricingGroups: Record<PricingCategory, PricePlan[]> = useMemo(
+    () => ({
+      creator: [
+        {
+          name: "Gratuito",
+          description: "Per provare il workflow UpPilot e organizzare i primi contenuti.",
+          monthly: 0,
+          suffix: "/mese",
+          features: [
+            "1 brand",
+            "30 post al mese",
+            "Importazione CSV",
+            "Anteprima Instagram e Facebook",
+            "Calendario base",
+          ],
+          cta: "Inizia gratis",
+        },
+        {
+          name: "Pro",
+          description: "Per creator e social manager che vogliono pubblicare con continuità.",
+          monthly: 29,
+          yearly: 23,
+          suffix: "/mese",
+          features: [
+            "3 brand attivi",
+            "Post illimitati",
+            "Approvazione cliente",
+            "Avvisi WhatsApp",
+            "AI Studio con 100 crediti",
+            "Analisi competitor",
+          ],
+          highlighted: true,
+          badge: "Consigliato",
+          cta: "Prova UpPilot",
+        },
+        {
+          name: "Studio",
+          description: "Per team leggeri che gestiscono più brand con un flusso pulito.",
+          monthly: 49,
+          yearly: 39,
+          suffix: "/mese",
+          features: [
+            "6 brand attivi",
+            "Sincronizzazione Google Sheets",
+            "Abbinamento media automatico",
+            "Link approvazione avanzati",
+            "AI Studio con 250 crediti",
+            "Supporto prioritario",
+          ],
+          cta: "Richiedi accesso",
+        },
+      ],
+      agency: [
+        {
+          name: "Avvio",
+          description: "Per piccole agenzie che vogliono centralizzare piano, revisione e pubblicazione.",
+          monthly: 59,
+          yearly: 47,
+          suffix: "/mese",
+          features: [
+            "10 clienti",
+            "Post illimitati",
+            "Importazione CSV e Sheets",
+            "Approvazioni senza login",
+            "Avvisi WhatsApp",
+            "AI Studio con 500 crediti",
+          ],
+          cta: "Contattaci",
+        },
+        {
+          name: "Crescita",
+          description: "Per agenzie in crescita con più clienti, cicli di approvazione e automazioni.",
+          monthly: 129,
+          yearly: 103,
+          suffix: "/mese",
+          features: [
+            "25 clienti",
+            "Flussi multi-brand",
+            "Pubblicazione automatica su Meta",
+            "Analisi competitor avanzata",
+            "AI Studio con 1.500 crediti",
+            "Supporto prioritario",
+          ],
+          highlighted: true,
+          badge: "Più scelto",
+          cta: "Richiedi accesso",
+        },
+        {
+          name: "Scala",
+          description: "Per strutture con volumi elevati, team dedicati e necessità operative avanzate.",
+          monthly: 249,
+          yearly: 199,
+          suffix: "/mese",
+          features: [
+            "Clienti illimitati",
+            "Ruoli e permessi avanzati",
+            "Onboarding guidato",
+            "Strategia AI personalizzata",
+            "Report operativi",
+            "Canale supporto dedicato",
+          ],
+          cta: "Parla con noi",
+        },
+      ],
+    }),
     []
   );
+
+  const pricing = pricingGroups[pricingCategory];
+  const activePricingPlan = hoveredPricingPlan;
+
+  const previewPricingPlan = (planIndex: number) => {
+    if (pricingHoverTimeoutRef.current) {
+      clearTimeout(pricingHoverTimeoutRef.current);
+    }
+
+    if (planIndex === activePricingPlan) return;
+
+    pricingHoverTimeoutRef.current = setTimeout(() => {
+      setHoveredPricingPlan(planIndex);
+      pricingHoverTimeoutRef.current = null;
+    }, 95);
+  };
+
+  const clearPricingPreview = () => {
+    if (pricingHoverTimeoutRef.current) {
+      clearTimeout(pricingHoverTimeoutRef.current);
+      pricingHoverTimeoutRef.current = null;
+    }
+
+    if (hoveredPricingPlan === null) return;
+
+    setHoveredPricingPlan(null);
+  };
 
   // ==========================================
   // 08. CONTENT - FAQ
@@ -212,6 +311,14 @@ export default function Page() {
     return () => {
       window.removeEventListener("scroll", onScroll);
       observer.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (pricingHoverTimeoutRef.current) {
+        clearTimeout(pricingHoverTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -339,24 +446,37 @@ export default function Page() {
   }, [rotatingPhrases.length]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setHeadlineVisible(false);
+    const phrase = heroHeadlinePhrases[headlineIndex];
+    let charIndex = 0;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
-      setTimeout(() => {
+    setTypedHeadline("");
+
+    const typeNextCharacter = () => {
+      charIndex += 1;
+      setTypedHeadline(phrase.slice(0, charIndex));
+
+      if (charIndex < phrase.length) {
+        timeoutId = setTimeout(typeNextCharacter, 72);
+        return;
+      }
+
+      timeoutId = setTimeout(() => {
         setHeadlineIndex((prev) => (prev + 1) % heroHeadlinePhrases.length);
-        setHeadlineVisible(true);
-      }, 240);
-    }, 2600);
+      }, 1450);
+    };
 
-    return () => clearInterval(interval);
-  }, [heroHeadlinePhrases.length]);
+    timeoutId = setTimeout(typeNextCharacter, 260);
+
+    return () => clearTimeout(timeoutId);
+  }, [headlineIndex, heroHeadlinePhrases]);
 
   useLayoutEffect(() => {
     const updateHeadlineOffset = () => {
-      if (!headlineLineRef.current || !headlineSlotRef.current || !headlineSubjectRef.current) return;
+      if (!headlineLineRef.current || !headlineSlotRef.current || !headlineMeasureRef.current) return;
 
       const slotWidth = headlineSlotRef.current.offsetWidth;
-      const subjectWidth = headlineSubjectRef.current.offsetWidth;
+      const subjectWidth = headlineMeasureRef.current.offsetWidth;
       const offset = Math.max((slotWidth - subjectWidth) / 2, 0);
 
       headlineLineRef.current.style.setProperty("--hero-title-optical-offset", `${offset}px`);
@@ -366,7 +486,7 @@ export default function Page() {
     window.addEventListener("resize", updateHeadlineOffset);
 
     return () => window.removeEventListener("resize", updateHeadlineOffset);
-  }, [headlineIndex, headlineVisible]);
+  }, [headlineIndex, heroHeadlinePhrases]);
 
   // ==========================================
   // 11. RENDER
@@ -423,8 +543,12 @@ export default function Page() {
                   <span className="hero-title-dynamic-wrap">
                     <span
                       ref={headlineSubjectRef}
-                      className={`hero-title-dynamic ${headlineVisible ? "is-visible" : "is-hidden"}`}
+                      className="hero-title-dynamic is-visible"
                     >
+                      {typedHeadline}
+                      <span className="hero-title-cursor" aria-hidden="true" />
+                    </span>
+                    <span ref={headlineMeasureRef} className="hero-title-measure" aria-hidden="true">
                       {heroHeadlinePhrases[headlineIndex]}
                     </span>
                   </span>
@@ -485,64 +609,107 @@ export default function Page() {
       {/* ========================================== */}
       {/* 17. PRICING */}
       {/* ========================================== */}
-        <section className="section" id="pricing">
+        <section className="section pricing-section" id="pricing">
         <div ref={nextRevealRef()} className="section-center fade">
-          <div className="section-eyebrow">Pricing trasparente</div>
-          <h2 className="section-title">Scegli il piano giusto per te</h2>
+          <div className="section-eyebrow">Prezzi</div>
+          <h2 className="section-title">Prezzi chiari, pensati per ogni fase di crescita</h2>
+          <p className="section-copy">
+            Da creator indipendenti ad agenzie strutturate: scegli il workflow che ti lascia più spazio per
+            strategia, contenuti e clienti.
+          </p>
 
-          <div className="pricing-toggle pricing-toggle-top">
-            <button type="button" className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>
-              Mensile
-            </button>
-            <button type="button" className={annual ? "active" : ""} onClick={() => setAnnual(true)}>
-              Annuale <span className="annual-discount">-20%</span>
-            </button>
+          <div className="pricing-controls" aria-label="Opzioni prezzo">
+            <div className="pricing-segment" role="tablist" aria-label="Categoria piano">
+              {(["creator", "agency"] as PricingCategory[]).map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  role="tab"
+                  aria-selected={pricingCategory === category}
+                  className={pricingCategory === category ? "active" : ""}
+                  onClick={() => {
+                    if (pricingHoverTimeoutRef.current) {
+                      clearTimeout(pricingHoverTimeoutRef.current);
+                      pricingHoverTimeoutRef.current = null;
+                    }
+
+                    setPricingCategory(category);
+                    setHoveredPricingPlan(null);
+                  }}
+                >
+                  {category === "creator" ? "Creator" : "Agency"}
+                </button>
+              ))}
+            </div>
+
+            <div className="pricing-toggle pricing-toggle-top" aria-label="Periodo di fatturazione">
+              <button type="button" className={!annual ? "active" : ""} onClick={() => setAnnual(false)}>
+                Mensile
+              </button>
+              <button type="button" className={annual ? "active" : ""} onClick={() => setAnnual(true)}>
+                Annuale <span className="annual-discount">-20%</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="pricing-grid" id="pricing-grid">
-          {pricing.map((plan) => {
+        <motion.div
+          className={`pricing-stage ${hoveredPricingPlan !== null ? "is-hover-previewing" : ""}`}
+          id="pricing-grid"
+          aria-live="polite"
+          onMouseLeave={clearPricingPreview}
+        >
+          {pricing.map((plan, index) => {
             const shownPrice = plan.yearly !== undefined && annual ? plan.yearly : plan.monthly;
+            const isFocused = activePricingPlan === index;
+            const galleryPosition = index === 0 ? "left" : index === 1 ? "center" : "right";
 
             return (
-              <div
-                key={plan.name}
+              <motion.div
+                key={`${pricingCategory}-${plan.name}`}
                 ref={nextRevealRef()}
-                className={`price-card fade ${plan.highlighted ? "highlight" : ""}`}
+                aria-current={isFocused ? "true" : undefined}
+                onMouseEnter={() => previewPricingPlan(index)}
+                className={`price-card fade ${plan.highlighted ? "highlight" : ""} ${
+                  isFocused ? "is-focused" : "is-neutral"
+                } is-${galleryPosition}`}
               >
-                {plan.highlighted && <div className="price-card-badge">Popular</div>}
+                <div className="price-card-inner">
+                  {plan.badge && <div className="price-card-badge">{plan.badge}</div>}
 
-                <div className="price-plan">{plan.name}</div>
+                  <div className="price-plan">{plan.name}</div>
+                  <p className="price-description">{plan.description}</p>
 
-                <div className="price-amount">
-                  <span>{`€${shownPrice}`}</span>
-                  <span>{plan.suffix ?? "/mese"}</span>
+                  <div className="price-amount">
+                    <span>{`€${shownPrice}`}</span>
+                    <span>{plan.suffix ?? "/mese"}</span>
+                  </div>
+
+                  <div className="price-features">
+                    {plan.features.map((feature) => (
+                      <div key={feature} className="price-feature">
+                        <div className="price-check">✓</div>
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
+
+                  <a href="#" className={`price-cta ${plan.highlighted ? "primary" : "outline"}`}>
+                    {plan.cta}
+                  </a>
                 </div>
-
-                <div className="price-features">
-                  {plan.features.map((feature) => (
-                    <div key={feature} className="price-feature">
-                      <div className="price-check">✓</div>
-                      {feature}
-                    </div>
-                  ))}
-                </div>
-
-                <a href="#" className={`price-cta ${plan.highlighted ? "primary" : "outline"}`}>
-                  {plan.cta}
-                </a>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
+        </motion.div>
 
         <div ref={nextRevealRef()} className="founding-banner fade">
           <div>
-            <h4>Founding Members</h4>
-            <p>€19/mese bloccato per sempre. Solo 30 posti.</p>
+            <h4>Accesso fondatori</h4>
+            <p>€19/mese bloccato per sempre. Disponibile per i primi 30 account.</p>
           </div>
           <a href="#" className="btn-primary founding-btn">
-            Riserva il tuo posto
+            Riserva il tuo accesso
           </a>
         </div>
         </section>
