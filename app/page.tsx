@@ -33,7 +33,6 @@ type FaqItem = {
 type FooterProps = {
   opacity: MotionValue<number>;
   borderRadius: MotionValue<string>;
-  revealProgress: MotionValue<number>;
   scale: MotionValue<number>;
   y: MotionValue<number>;
 };
@@ -100,10 +99,10 @@ export default function Page() {
     const clamped = Math.min(Math.max(latest, 0), 1);
     return clamped * clamped * (3 - 2 * clamped);
   });
-  const footerY = useTransform(footerSceneProgress, [0, 0.48, 1], [18, 6, 0]);
-  const footerOpacity = useTransform(footerSceneProgress, [0, 0.34, 1], [0.94, 0.98, 1]);
-  const footerScale = useTransform(footerSceneProgress, [0, 0.58, 1], [0.992, 1, 1]);
-  const footerBorderRadius = useTransform(footerSceneProgress, [0, 0.6, 1], ["24px", "14px", "0px"]);
+  const footerY = useTransform(footerSceneProgress, [0, 1], [10, 0]);
+  const footerOpacity = useTransform(footerSceneProgress, [0, 1], [0.96, 1]);
+  const footerScale = useTransform(footerSceneProgress, [0, 1], [0.997, 1]);
+  const footerBorderRadius = useTransform(footerSceneProgress, [0, 1], ["18px", "0px"]);
 
   const setRevealRef = (index: number) => (el: HTMLElement | null) => {
     revealRefs.current[index] = el;
@@ -372,11 +371,11 @@ export default function Page() {
       const viewportHeight = window.innerHeight;
       const isCompactDesktop = viewportWidth <= 1280 || viewportHeight <= 820;
       const isMediumDesktop = !isCompactDesktop && (viewportWidth <= 1440 || viewportHeight <= 900);
-      const motionRange = isCompactDesktop ? 0.52 : isMediumDesktop ? 0.58 : 0.64;
-      const shiftFactor = isCompactDesktop ? 0.62 : isMediumDesktop ? 0.78 : 1;
-      const scaleFactor = isCompactDesktop ? 0.58 : isMediumDesktop ? 0.78 : 1;
-      const tiltFactor = isCompactDesktop ? 0.55 : isMediumDesktop ? 0.76 : 1;
-      const surfaceFactor = isCompactDesktop ? 0.74 : isMediumDesktop ? 0.86 : 1;
+      const motionRange = isCompactDesktop ? 0.46 : isMediumDesktop ? 0.54 : 0.62;
+      const shiftFactor = isCompactDesktop ? 0.44 : isMediumDesktop ? 0.68 : 1;
+      const scaleFactor = isCompactDesktop ? 0.42 : isMediumDesktop ? 0.66 : 1;
+      const tiltFactor = isCompactDesktop ? 0.42 : isMediumDesktop ? 0.68 : 1;
+      const surfaceFactor = isCompactDesktop ? 0.68 : isMediumDesktop ? 0.82 : 1;
       const stageRect = mediaStageRef.current.getBoundingClientRect();
       const travel = Math.max(stageRect.height - window.innerHeight, 1);
       const rawProgress = clamp(-stageRect.top / travel, 0, 1);
@@ -895,7 +894,6 @@ export default function Page() {
           <Footer
             opacity={footerOpacity}
             borderRadius={footerBorderRadius}
-            revealProgress={footerSceneProgress}
             scale={footerScale}
             y={footerY}
           />
@@ -907,19 +905,7 @@ export default function Page() {
   );
 }
 
-function Footer({ opacity, borderRadius, revealProgress, scale, y }: FooterProps) {
-  const panelY = useTransform(revealProgress, [0, 0.42, 1], [42, 14, 0]);
-  const panelScale = useTransform(revealProgress, [0, 0.48, 1], [0.985, 0.998, 1]);
-  const brandY = useTransform(revealProgress, [0, 0.55, 1], [30, 10, 0]);
-  const brandOpacity = useTransform(revealProgress, [0, 0.36, 1], [0.72, 0.9, 1]);
-  const headlineY = useTransform(revealProgress, [0, 0.52, 1], [38, 12, 0]);
-  const headlineOpacity = useTransform(revealProgress, [0, 0.34, 1], [0.78, 0.94, 1]);
-  const ctaY = useTransform(revealProgress, [0, 0.56, 1], [44, 14, 0]);
-  const ctaOpacity = useTransform(revealProgress, [0, 0.42, 1], [0.72, 0.92, 1]);
-  const navigationY = useTransform(revealProgress, [0, 0.58, 1], [46, 16, 0]);
-  const navigationOpacity = useTransform(revealProgress, [0, 0.44, 1], [0.68, 0.9, 1]);
-  const navigationScale = useTransform(revealProgress, [0, 0.58, 1], [0.99, 1, 1]);
-
+function Footer({ opacity, borderRadius, scale, y }: FooterProps) {
   return (
     <motion.footer
       className="site-footer"
@@ -930,9 +916,9 @@ function Footer({ opacity, borderRadius, revealProgress, scale, y }: FooterProps
         y,
       }}
     >
-      <motion.div className="footer-panel" style={{ scale: panelScale, y: panelY }}>
+      <div className="footer-panel">
         <div className="footer-hero">
-          <motion.div className="footer-brand" style={{ opacity: brandOpacity, y: brandY }}>
+          <div className="footer-brand">
             <div className="footer-brand-top">
               <div className="nav-icon footer-icon">UP</div>
               <span className="footer-brand-name">UpPilot</span>
@@ -964,20 +950,18 @@ function Footer({ opacity, borderRadius, revealProgress, scale, y }: FooterProps
                 </svg>
               </a>
             </div>
-          </motion.div>
+          </div>
 
           <div className="footer-statement">
             <span>Final destination</span>
-            <motion.h2 style={{ opacity: headlineOpacity, y: headlineY }}>
-              Entra nel workflow che pubblica da solo.
-            </motion.h2>
-            <motion.a href="#pricing" className="footer-primary-link" style={{ opacity: ctaOpacity, y: ctaY }}>
+            <h2>Entra nel workflow che pubblica da solo.</h2>
+            <a href="#pricing" className="footer-primary-link">
               Inizia gratis
-            </motion.a>
+            </a>
           </div>
         </div>
 
-        <motion.div className="footer-grid" style={{ opacity: navigationOpacity, scale: navigationScale, y: navigationY }}>
+        <div className="footer-grid">
           <div className="footer-col">
             <span className="footer-card-index">01</span>
             <h5>Prodotto</h5>
@@ -995,7 +979,7 @@ function Footer({ opacity, borderRadius, revealProgress, scale, y }: FooterProps
             <a href="#">Contatti</a>
             <a href="#">Lavora con noi</a>
           </div>
-        </motion.div>
+        </div>
 
         <div className="footer-bottom">
           <span>© 2026 UpPilot. Tutti i diritti riservati.</span>
@@ -1004,7 +988,7 @@ function Footer({ opacity, borderRadius, revealProgress, scale, y }: FooterProps
             <a href="#">Termini</a>
           </div>
         </div>
-      </motion.div>
+      </div>
     </motion.footer>
   );
 }

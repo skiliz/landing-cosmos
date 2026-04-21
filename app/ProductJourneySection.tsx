@@ -403,29 +403,50 @@ function ApprovalMockup() {
 function PublishMockup() {
   return (
     <div className="mockup-body publish-mockup">
-      <div className="abstract-publish-space">
-        <div className="publish-depth-grid" aria-hidden="true" />
-        <div className="floating-post floating-post-a">
-          <span />
-          <strong>Reel Instagram</strong>
-          <i>9:16</i>
+      <div className="publish-calendar-space">
+        <div className="calendar-panel">
+          <div className="calendar-header">
+            <div>
+              <span>Calendario</span>
+              <strong>Settimana social</strong>
+            </div>
+            <p>12 contenuti programmati</p>
+          </div>
+
+          <div className="platform-legend" aria-label="Piattaforme">
+            <span className="is-instagram">Instagram</span>
+            <span className="is-facebook">Facebook</span>
+            <span className="is-tiktok">TikTok</span>
+          </div>
+
+          <div className="calendar-grid" aria-label="Calendario pubblicazioni">
+            {["Lun", "Mar", "Mer", "Gio"].map((day) => (
+              <div key={day} className="calendar-day">
+                <span>{day}</span>
+              </div>
+            ))}
+            <div className="calendar-slot is-instagram">
+              <b>Post</b>
+              <span>09:30</span>
+            </div>
+            <div className="calendar-slot is-facebook">
+              <b>Story</b>
+              <span>12:00</span>
+            </div>
+            <div className="calendar-slot is-tiktok">
+              <b>Reel</b>
+              <span>18:45</span>
+            </div>
+            <div className="calendar-slot is-instagram is-scheduled">
+              <b>Post</b>
+              <span>Domani</span>
+            </div>
+          </div>
         </div>
-        <div className="floating-post floating-post-b">
+
+        <div className="publish-calendar-status">
           <span />
-          <strong>Post Facebook</strong>
-          <i>1:1</i>
-        </div>
-        <div className="floating-post floating-post-c">
-          <span />
-          <strong>Story Meta</strong>
-          <i>Live</i>
-        </div>
-        <div className="publish-deploy-line" aria-hidden="true">
-          <span />
-        </div>
-        <div className="publish-state">
-          <span />
-          Pubblicato su Meta
+          Pubblicazione automatica attiva
         </div>
       </div>
     </div>
@@ -435,26 +456,22 @@ function PublishMockup() {
 function AlertsMockup() {
   return (
     <div className="mockup-body alerts-mockup">
-      <div className="notification-network-space">
-        <div className="alert-network-grid" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
+      <div className="whatsapp-alert-space">
         <div className="alert-phone-card">
           <div className="alert-phone-header">
             <span>W</span>
             <div>
-              <strong>UpPilot Alerts</strong>
-              <p>WhatsApp Business</p>
+              <strong>UpPilot</strong>
+              <p>aggiornamenti in tempo reale</p>
             </div>
           </div>
 
           <div className="alert-feed">
             {[
-              ["Pubblicato", "Il reel skincare è online su Instagram.", "success"],
-              ["Azione richiesta", "Token Meta in scadenza tra 3 giorni.", "warning"],
-              ["Errore rilevato", "Story non pubblicata: formato da rivedere.", "error"],
+              ["Pubblicato", "Post pubblicato con successo su Instagram.", "success"],
+              ["Approvato", "Il cliente ha approvato il contenuto.", "approved"],
+              ["Attenzione", "Token Meta in scadenza tra 3 giorni.", "warning"],
+              ["Errore", "Errore di pubblicazione rilevato.", "error"],
             ].map(([label, text, status]) => (
               <div key={label} className={`alert-message is-${status}`}>
                 <i />
@@ -468,7 +485,7 @@ function AlertsMockup() {
 
           <div className="alert-delivery-state">
             <span />
-            Avvisi inviati al team
+            Notifiche WhatsApp attive
           </div>
         </div>
       </div>
