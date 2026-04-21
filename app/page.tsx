@@ -98,15 +98,12 @@ export default function Page() {
   });
   const footerSceneProgress = useTransform(footerRevealProgress, (latest) => {
     const clamped = Math.min(Math.max(latest, 0), 1);
-    const eased = clamped * clamped * (3 - 2 * clamped);
-    const firstSettle = 0.035 * Math.exp(-Math.pow((clamped - 0.32) / 0.085, 2));
-    const secondSettle = 0.045 * Math.exp(-Math.pow((clamped - 0.68) / 0.1, 2));
-    return Math.min(Math.max(eased - firstSettle - secondSettle, 0), 1);
+    return clamped * clamped * (3 - 2 * clamped);
   });
-  const footerY = useTransform(footerSceneProgress, [0, 0.42, 1], [34, 10, 0]);
-  const footerOpacity = useTransform(footerSceneProgress, [0, 0.28, 1], [0.9, 0.96, 1]);
-  const footerScale = useTransform(footerSceneProgress, [0, 0.5, 1], [0.985, 1, 1]);
-  const footerBorderRadius = useTransform(footerSceneProgress, [0, 0.54, 1], ["30px", "18px", "0px"]);
+  const footerY = useTransform(footerSceneProgress, [0, 0.48, 1], [18, 6, 0]);
+  const footerOpacity = useTransform(footerSceneProgress, [0, 0.34, 1], [0.94, 0.98, 1]);
+  const footerScale = useTransform(footerSceneProgress, [0, 0.58, 1], [0.992, 1, 1]);
+  const footerBorderRadius = useTransform(footerSceneProgress, [0, 0.6, 1], ["24px", "14px", "0px"]);
 
   const setRevealRef = (index: number) => (el: HTMLElement | null) => {
     revealRefs.current[index] = el;
@@ -371,10 +368,19 @@ export default function Page() {
       const smooth = (value: number) => value * value * (3 - 2 * value);
 
       const isDesktop = window.innerWidth > 768;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const isCompactDesktop = viewportWidth <= 1280 || viewportHeight <= 820;
+      const isMediumDesktop = !isCompactDesktop && (viewportWidth <= 1440 || viewportHeight <= 900);
+      const motionRange = isCompactDesktop ? 0.52 : isMediumDesktop ? 0.58 : 0.64;
+      const shiftFactor = isCompactDesktop ? 0.62 : isMediumDesktop ? 0.78 : 1;
+      const scaleFactor = isCompactDesktop ? 0.58 : isMediumDesktop ? 0.78 : 1;
+      const tiltFactor = isCompactDesktop ? 0.55 : isMediumDesktop ? 0.76 : 1;
+      const surfaceFactor = isCompactDesktop ? 0.74 : isMediumDesktop ? 0.86 : 1;
       const stageRect = mediaStageRef.current.getBoundingClientRect();
       const travel = Math.max(stageRect.height - window.innerHeight, 1);
       const rawProgress = clamp(-stageRect.top / travel, 0, 1);
-      const progress = clamp(rawProgress / 0.74, 0, 1);
+      const progress = clamp(rawProgress / motionRange, 0, 1);
 
       const zoomEnd = 0.28;
       const holdEnd = 0.72;
@@ -382,33 +388,51 @@ export default function Page() {
       const holdPhase = smooth(clamp((progress - zoomEnd) / (holdEnd - zoomEnd), 0, 1));
       const exitPhase = ease(clamp((progress - holdEnd) / (1 - holdEnd), 0, 1));
 
-      const holdMicroScale = Math.sin(holdPhase * Math.PI) * 0.02;
-      const holdMicroShift = Math.sin(holdPhase * Math.PI) * -10;
+      const holdMicroScale = Math.sin(holdPhase * Math.PI) * 0.02 * scaleFactor;
+      const holdMicroShift = Math.sin(holdPhase * Math.PI) * -10 * shiftFactor;
+      const adaptScale = (value: number) => 1 + (value - 1) * scaleFactor;
 
-      const shift =
+      const baseShift =
         progress < zoomEnd
           ? lerp(48, -86, zoomPhase)
           : progress < holdEnd
             ? lerp(-86, -112, holdPhase) + holdMicroShift
             : lerp(-112, -138, exitPhase);
+      const shift = baseShift * shiftFactor;
       const scale =
         progress < zoomEnd
-          ? lerp(0.9, 1.28, zoomPhase)
+          ? lerp(adaptScale(0.9), adaptScale(1.28), zoomPhase)
           : progress < holdEnd
-            ? lerp(1.28, 1.34, holdPhase) + holdMicroScale
-            : lerp(1.34, 1.38, exitPhase);
+            ? lerp(adaptScale(1.28), adaptScale(1.34), holdPhase) + holdMicroScale
+            : lerp(adaptScale(1.34), adaptScale(1.38), exitPhase);
       const opacity =
         progress < zoomEnd ? lerp(0.92, 1, zoomPhase) : progress < holdEnd ? 1 : lerp(1, 0.985, exitPhase);
       const tilt =
-        progress < zoomEnd ? lerp(2.4, 0.2, zoomPhase) : progress < holdEnd ? 0.2 : lerp(0.2, 0, exitPhase);
+        progress < zoomEnd
+          ? lerp(2.4 * tiltFactor, 0.2 * tiltFactor, zoomPhase)
+          : progress < holdEnd
+            ? 0.2 * tiltFactor
+            : lerp(0.2 * tiltFactor, 0, exitPhase);
       const radius =
         progress < zoomEnd ? lerp(28, 8, zoomPhase) : progress < holdEnd ? lerp(8, 2, holdPhase) : lerp(2, 0, exitPhase);
       const glow =
-        progress < zoomEnd ? lerp(0.36, 0.58, zoomPhase) : progress < holdEnd ? 0.58 : lerp(0.58, 0.3, exitPhase);
+        progress < zoomEnd
+          ? lerp(0.36, 0.58 * surfaceFactor, zoomPhase)
+          : progress < holdEnd
+            ? 0.58 * surfaceFactor
+            : lerp(0.58 * surfaceFactor, 0.3, exitPhase);
       const shadow =
-        progress < zoomEnd ? lerp(0.24, 0.4, zoomPhase) : progress < holdEnd ? 0.4 : lerp(0.4, 0.28, exitPhase);
+        progress < zoomEnd
+          ? lerp(0.24, 0.4 * surfaceFactor, zoomPhase)
+          : progress < holdEnd
+            ? 0.4 * surfaceFactor
+            : lerp(0.4 * surfaceFactor, 0.28, exitPhase);
       const backdrop =
-        progress < zoomEnd ? lerp(0, 0.26, zoomPhase) : progress < holdEnd ? 0.26 : lerp(0.26, 0.08, exitPhase);
+        progress < zoomEnd
+          ? lerp(0, 0.26 * surfaceFactor, zoomPhase)
+          : progress < holdEnd
+            ? 0.26 * surfaceFactor
+            : lerp(0.26 * surfaceFactor, 0.08, exitPhase);
 
       root.style.setProperty("--hero-video-shift", `${shift}px`);
       root.style.setProperty("--hero-video-scale", `${scale}`);
@@ -648,6 +672,20 @@ export default function Page() {
         <ProductJourneySection />
 
       {/* ========================================== */}
+      {/* 20. CTA */}
+      {/* ========================================== */}
+        <section className="cta-section">
+        <div ref={nextRevealRef()} className="cta-box fade">
+          <div className="cta-glow" />
+          <h2>Pronto a mettere il pilota automatico?</h2>
+          <p>Inizia gratis. Nessuna carta di credito. Nessun lock-in. Cancella quando vuoi.</p>
+          <a href="#" className="btn-primary">
+            Crea il tuo account gratuito
+          </a>
+        </div>
+        </section>
+
+      {/* ========================================== */}
       {/* 17. PRICING */}
       {/* ========================================== */}
         <section className="section pricing-section" id="pricing">
@@ -851,20 +889,6 @@ export default function Page() {
           })}
         </div>
         </section>
-
-      {/* ========================================== */}
-      {/* 20. CTA */}
-      {/* ========================================== */}
-        <section className="cta-section">
-        <div ref={nextRevealRef()} className="cta-box fade">
-          <div className="cta-glow" />
-          <h2>Pronto a mettere il pilota automatico?</h2>
-          <p>Inizia gratis. Nessuna carta di credito. Nessun lock-in. Cancella quando vuoi.</p>
-          <a href="#" className="btn-primary">
-            Crea il tuo account gratuito
-          </a>
-        </div>
-        </section>
         </div>
 
         <section ref={footerRevealRef} className="footer-scene" aria-label="Finale UpPilot">
@@ -884,17 +908,17 @@ export default function Page() {
 }
 
 function Footer({ opacity, borderRadius, revealProgress, scale, y }: FooterProps) {
-  const panelY = useTransform(revealProgress, [0, 0.34, 0.68, 1], [84, 36, 10, 0]);
-  const panelScale = useTransform(revealProgress, [0, 0.38, 0.72, 1], [0.965, 0.995, 1.018, 1.028]);
-  const brandY = useTransform(revealProgress, [0, 0.45, 1], [58, 22, -8]);
-  const brandOpacity = useTransform(revealProgress, [0, 0.34, 0.78, 1], [0.62, 0.82, 0.96, 1]);
-  const headlineY = useTransform(revealProgress, [0, 0.36, 0.72, 1], [70, 26, -4, -14]);
-  const headlineOpacity = useTransform(revealProgress, [0, 0.3, 0.78, 1], [0.72, 0.9, 0.98, 1]);
-  const ctaY = useTransform(revealProgress, [0, 0.42, 0.78, 1], [82, 34, 8, -2]);
-  const ctaOpacity = useTransform(revealProgress, [0, 0.38, 0.82, 1], [0.62, 0.84, 0.98, 1]);
-  const navigationY = useTransform(revealProgress, [0, 0.48, 0.8, 1], [92, 42, 12, 0]);
-  const navigationOpacity = useTransform(revealProgress, [0, 0.42, 0.84, 1], [0.6, 0.82, 0.98, 1]);
-  const navigationScale = useTransform(revealProgress, [0, 0.5, 0.82, 1], [0.975, 1, 1.018, 1.018]);
+  const panelY = useTransform(revealProgress, [0, 0.42, 1], [42, 14, 0]);
+  const panelScale = useTransform(revealProgress, [0, 0.48, 1], [0.985, 0.998, 1]);
+  const brandY = useTransform(revealProgress, [0, 0.55, 1], [30, 10, 0]);
+  const brandOpacity = useTransform(revealProgress, [0, 0.36, 1], [0.72, 0.9, 1]);
+  const headlineY = useTransform(revealProgress, [0, 0.52, 1], [38, 12, 0]);
+  const headlineOpacity = useTransform(revealProgress, [0, 0.34, 1], [0.78, 0.94, 1]);
+  const ctaY = useTransform(revealProgress, [0, 0.56, 1], [44, 14, 0]);
+  const ctaOpacity = useTransform(revealProgress, [0, 0.42, 1], [0.72, 0.92, 1]);
+  const navigationY = useTransform(revealProgress, [0, 0.58, 1], [46, 16, 0]);
+  const navigationOpacity = useTransform(revealProgress, [0, 0.44, 1], [0.68, 0.9, 1]);
+  const navigationScale = useTransform(revealProgress, [0, 0.58, 1], [0.99, 1, 1]);
 
   return (
     <motion.footer

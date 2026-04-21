@@ -436,20 +436,40 @@ function AlertsMockup() {
   return (
     <div className="mockup-body alerts-mockup">
       <div className="notification-network-space">
-        <div className="network-line line-a" aria-hidden="true" />
-        <div className="network-line line-b" aria-hidden="true" />
-        <div className="network-line line-c" aria-hidden="true" />
-        {["Meta", "Token", "UpPilot", "WhatsApp", "Cliente"].map((node, index) => (
-          <div key={node} className={`network-node network-node-${index + 1}`}>
-            <span />
-            <strong>{node}</strong>
+        <div className="alert-network-grid" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="alert-phone-card">
+          <div className="alert-phone-header">
+            <span>W</span>
+            <div>
+              <strong>UpPilot Alerts</strong>
+              <p>WhatsApp Business</p>
+            </div>
           </div>
-        ))}
-        <div className="network-signal" aria-hidden="true" />
-        <div className="network-notification">
-          <span>WhatsApp</span>
-          <strong>Token Meta in scadenza</strong>
-          <p>Avviso inviato al team.</p>
+
+          <div className="alert-feed">
+            {[
+              ["Pubblicato", "Il reel skincare è online su Instagram.", "success"],
+              ["Azione richiesta", "Token Meta in scadenza tra 3 giorni.", "warning"],
+              ["Errore rilevato", "Story non pubblicata: formato da rivedere.", "error"],
+            ].map(([label, text, status]) => (
+              <div key={label} className={`alert-message is-${status}`}>
+                <i />
+                <div>
+                  <strong>{label}</strong>
+                  <p>{text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="alert-delivery-state">
+            <span />
+            Avvisi inviati al team
+          </div>
         </div>
       </div>
     </div>
