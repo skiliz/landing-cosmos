@@ -11,6 +11,7 @@ type JourneyStep = {
   description: string;
   metric: string;
   accent: string;
+  tools: string[];
   mockup: "import" | "media" | "preview" | "approval" | "publish" | "alerts" | "ai";
 };
 
@@ -22,6 +23,7 @@ const journeySteps: JourneyStep[] = [
     description: "Carica un CSV o collega Google Sheets. Ogni riga diventa un contenuto programmato, ordinato e pronto da gestire.",
     metric: "42 righe mappate",
     accent: "violet",
+    tools: ["CSV", "Sheets"],
     mockup: "import",
   },
   {
@@ -31,6 +33,7 @@ const journeySteps: JourneyStep[] = [
     description: "Carica i file media e lascia che UpPilot abbini creatività, caption e date in un flusso pulito.",
     metric: "96% abbinati automaticamente",
     accent: "blue",
+    tools: ["Media", "Cloud"],
     mockup: "media",
   },
   {
@@ -40,6 +43,7 @@ const journeySteps: JourneyStep[] = [
     description: "Controlla caption, creatività, formato e orario in un’anteprima chiara, prima di pubblicare.",
     metric: "IG + FB pronti",
     accent: "violet",
+    tools: ["Instagram", "Meta"],
     mockup: "preview",
   },
   {
@@ -49,6 +53,7 @@ const journeySteps: JourneyStep[] = [
     description: "Condividi un link dedicato: il cliente rivede e approva i contenuti rapidamente, senza creare account.",
     metric: "Nessun login richiesto",
     accent: "blue",
+    tools: ["Link", "Clienti"],
     mockup: "approval",
   },
   {
@@ -58,6 +63,7 @@ const journeySteps: JourneyStep[] = [
     description: "Dopo l’approvazione, il motore monitora, sincronizza e pubblica su Meta senza passaggi manuali.",
     metric: "Sync Meta attiva",
     accent: "violet",
+    tools: ["Meta", "Autopilot"],
     mockup: "publish",
   },
   {
@@ -68,6 +74,7 @@ const journeySteps: JourneyStep[] = [
       "Ricevi avvisi su pubblicazioni riuscite, problemi di consegna e token in scadenza senza controllare continuamente la dashboard.",
     metric: "Alert WhatsApp",
     accent: "blue",
+    tools: ["WhatsApp", "Token"],
     mockup: "alerts",
   },
   {
@@ -77,6 +84,7 @@ const journeySteps: JourneyStep[] = [
     description: "Genera caption, costruisci piani editoriali, analizza competitor e supporta il lavoro creativo con l’AI.",
     metric: "4 flussi AI",
     accent: "violet",
+    tools: ["AI", "Strategia"],
     mockup: "ai",
   },
 ];
@@ -175,15 +183,22 @@ export default function ProductJourneySection() {
 
       <div className="journey-shell">
         <div className="journey-steps">
+          <motion.span
+            className="journey-progress-line"
+            aria-hidden="true"
+            initial={false}
+            animate={{ scaleY: Math.max(0.08, (activeStep + 0.45) / steps.length) }}
+            transition={{ duration: 0.72, ease: premiumEase }}
+          />
           {steps.map((step, index) => (
             <motion.article
               ref={(element) => {
                 stepRefs.current[index] = element;
               }}
               key={step.step}
-              className={`journey-step journey-step-${step.step} ${index % 2 === 1 ? "is-reversed" : ""} ${
+              className={`journey-step journey-step-${step.step} ${index % 2 === 1 ? "is-reversed" : ""} ${index < activeStep ? "is-past" : ""} ${
                 activeStep === index ? "is-active" : ""
-              }`}
+              } ${index === activeStep + 1 ? "is-next" : ""}`}
               variants={stepVariants}
               custom={index % 2 === 0 ? 1 : -1}
               initial="hidden"
@@ -201,10 +216,20 @@ export default function ProductJourneySection() {
                   <span />
                   {step.metric}
                 </motion.div>
+                <motion.div className="journey-tool-row" variants={childVariants} aria-label="Integrazioni e strumenti">
+                  {step.tools.map((tool) => (
+                    <span key={tool} className="journey-tool-chip">
+                      <i aria-hidden="true">{toolIcon(tool)}</i>
+                      {tool}
+                    </span>
+                  ))}
+                </motion.div>
               </div>
 
               <div className="journey-step-timeline" aria-hidden="true">
                 <span className="journey-node" />
+                <span className="journey-flow-dot journey-flow-dot-a" />
+                <span className="journey-flow-dot journey-flow-dot-b" />
               </div>
 
               <motion.div
@@ -229,6 +254,22 @@ export default function ProductJourneySection() {
       </div>
     </section>
   );
+}
+
+function toolIcon(tool: string) {
+  if (tool === "CSV") return "CSV";
+  if (tool === "Sheets") return "G";
+  if (tool === "Media") return "◐";
+  if (tool === "Cloud") return "☁";
+  if (tool === "Instagram") return "IG";
+  if (tool === "Meta") return "M";
+  if (tool === "Link") return "↗";
+  if (tool === "Clienti") return "✓";
+  if (tool === "Autopilot") return "A";
+  if (tool === "WhatsApp") return "W";
+  if (tool === "Token") return "T";
+  if (tool === "AI") return "AI";
+  return "•";
 }
 
 function Mockup({ step }: { step: JourneyStep }) {
@@ -262,6 +303,9 @@ function ImportMockup() {
           </div>
         ))}
       </div>
+      <div className="import-live-bar" aria-hidden="true">
+        <span />
+      </div>
     </div>
   );
 }
@@ -276,6 +320,11 @@ function MediaMockup() {
           <span />
         </div>
         <p>18 file media caricati</p>
+      </div>
+      <div className="media-match-rail" aria-hidden="true">
+        <span />
+        <span />
+        <span />
       </div>
       <div className="match-list">
         {["reel-01.mp4", "post-hero.jpg", "story-set.zip"].map((file, index) => (
@@ -303,6 +352,10 @@ function PreviewMockup() {
         </div>
         <div className="preview-creative">
           <span>9:16</span>
+        </div>
+        <div className="preview-status" aria-hidden="true">
+          <i />
+          Pubblicabile
         </div>
         <div className="caption-lines">
           <span />
@@ -334,6 +387,11 @@ function ApprovalMockup() {
           <button type="button">Richiedi modifica</button>
         </div>
       </div>
+      <div className="approval-flow" aria-hidden="true">
+        <span />
+        <i />
+        <strong />
+      </div>
       <div className="approval-activity">
         <span />
         Maria ha approvato 8 post su 12
@@ -345,21 +403,30 @@ function ApprovalMockup() {
 function PublishMockup() {
   return (
     <div className="mockup-body publish-mockup">
-      <div className="engine-orbit">
-        <span />
-        <i />
-      </div>
-      <div className="engine-status">
-        <strong>Motore di pubblicazione</strong>
-        <p>Monitora i contenuti approvati ogni minuto</p>
-      </div>
-      <div className="publish-queue">
-        {["Reel Instagram", "Post Facebook", "Story Instagram"].map((item, index) => (
-          <div key={item}>
-            <span>{item}</span>
-            <strong>{["In coda", "Sincronizzato", "Pubblicato"][index]}</strong>
-          </div>
-        ))}
+      <div className="abstract-publish-space">
+        <div className="publish-depth-grid" aria-hidden="true" />
+        <div className="floating-post floating-post-a">
+          <span />
+          <strong>Reel Instagram</strong>
+          <i>9:16</i>
+        </div>
+        <div className="floating-post floating-post-b">
+          <span />
+          <strong>Post Facebook</strong>
+          <i>1:1</i>
+        </div>
+        <div className="floating-post floating-post-c">
+          <span />
+          <strong>Story Meta</strong>
+          <i>Live</i>
+        </div>
+        <div className="publish-deploy-line" aria-hidden="true">
+          <span />
+        </div>
+        <div className="publish-state">
+          <span />
+          Pubblicato su Meta
+        </div>
       </div>
     </div>
   );
@@ -368,16 +435,23 @@ function PublishMockup() {
 function AlertsMockup() {
   return (
     <div className="mockup-body alerts-mockup">
-      {[
-        ["Pubblicato", "Il teaser di lancio è online su Instagram."],
-        ["Azione richiesta", "Il token Meta scade tra 3 giorni."],
-        ["Problema consegna", "La creatività della story richiede un nuovo formato."],
-      ].map(([label, text], index) => (
-        <div key={label} className={index === 1 ? "is-warning" : ""}>
-          <strong>{label}</strong>
-          <p>{text}</p>
+      <div className="notification-network-space">
+        <div className="network-line line-a" aria-hidden="true" />
+        <div className="network-line line-b" aria-hidden="true" />
+        <div className="network-line line-c" aria-hidden="true" />
+        {["Meta", "Token", "UpPilot", "WhatsApp", "Cliente"].map((node, index) => (
+          <div key={node} className={`network-node network-node-${index + 1}`}>
+            <span />
+            <strong>{node}</strong>
+          </div>
+        ))}
+        <div className="network-signal" aria-hidden="true" />
+        <div className="network-notification">
+          <span>WhatsApp</span>
+          <strong>Token Meta in scadenza</strong>
+          <p>Avviso inviato al team.</p>
         </div>
-      ))}
+      </div>
     </div>
   );
 }
@@ -388,6 +462,7 @@ function AiMockup() {
       <div className="ai-prompt">
         <span>AI Studio</span>
         <p>Crea un piano contenuti di 30 giorni per un brand skincare premium.</p>
+        <i aria-hidden="true" />
       </div>
       <div className="ai-grid">
         <div>Caption</div>

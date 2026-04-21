@@ -46,9 +46,11 @@ export default function Page() {
   // 04. UI STATE
   // ==========================================
   const [scrolled, setScrolled] = useState(false);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [annual, setAnnual] = useState(false);
   const [pricingCategory, setPricingCategory] = useState<PricingCategory>("creator");
   const [hoveredPricingPlan, setHoveredPricingPlan] = useState<number | null>(null);
+  const [openMobilePlan, setOpenMobilePlan] = useState(1);
   const [openFaq, setOpenFaq] = useState(0);
 
   // ==========================================
@@ -83,6 +85,7 @@ export default function Page() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const heroMotionFrameRef = useRef<number | null>(null);
   const pricingHoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const previousScrollYRef = useRef(0);
   const headlineLineRef = useRef<HTMLSpanElement | null>(null);
   const headlineSlotRef = useRef<HTMLSpanElement | null>(null);
   const headlineSubjectRef = useRef<HTMLSpanElement | null>(null);
@@ -230,6 +233,8 @@ export default function Page() {
   const activePricingPlan = hoveredPricingPlan;
 
   const previewPricingPlan = (planIndex: number) => {
+    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
+
     if (pricingHoverTimeoutRef.current) {
       clearTimeout(pricingHoverTimeoutRef.current);
     }
@@ -283,13 +288,47 @@ export default function Page() {
   );
 
   // ==========================================
-  // 09. EFFECT - NAV SCROLL + REVEAL ON SCROLL
+  // 09. EFFECT - FIXED HEADER SCROLL DIRECTION
   // ==========================================
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const deltaThreshold = 6;
+    const topThreshold = 90;
+    previousScrollYRef.current = Math.max(window.scrollY, 0);
+
+    const onScroll = () => {
+      const currentScrollY = Math.max(window.scrollY, 0);
+      const previousScrollY = previousScrollYRef.current;
+      const scrollDelta = currentScrollY - previousScrollY;
+
+      setScrolled(currentScrollY > 40);
+
+      if (currentScrollY <= topThreshold) {
+        setIsHeaderVisible(true);
+        previousScrollYRef.current = currentScrollY;
+        return;
+      }
+
+      if (Math.abs(scrollDelta) < deltaThreshold) return;
+
+      if (currentScrollY < previousScrollY) {
+        setIsHeaderVisible(true);
+      } else {
+        setIsHeaderVisible(false);
+      }
+
+      previousScrollYRef.current = currentScrollY;
+    };
+
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
 
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // ==========================================
+  // 10. EFFECT - REVEAL ON SCROLL
+  // ==========================================
+  useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -309,7 +348,6 @@ export default function Page() {
     });
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
       observer.disconnect();
     };
   }, []);
@@ -335,10 +373,11 @@ export default function Page() {
       const isDesktop = window.innerWidth > 768;
       const stageRect = mediaStageRef.current.getBoundingClientRect();
       const travel = Math.max(stageRect.height - window.innerHeight, 1);
-      const progress = clamp(-stageRect.top / travel, 0, 1);
+      const rawProgress = clamp(-stageRect.top / travel, 0, 1);
+      const progress = clamp(rawProgress / 0.74, 0, 1);
 
-      const zoomEnd = 0.22;
-      const holdEnd = 0.82;
+      const zoomEnd = 0.28;
+      const holdEnd = 0.72;
       const zoomPhase = ease(clamp(progress / zoomEnd, 0, 1));
       const holdPhase = smooth(clamp((progress - zoomEnd) / (holdEnd - zoomEnd), 0, 1));
       const exitPhase = ease(clamp((progress - holdEnd) / (1 - holdEnd), 0, 1));
@@ -403,7 +442,7 @@ export default function Page() {
         const scrubProgress = clamp((progress - zoomEnd) / (holdEnd - zoomEnd), 0, 1);
         const targetTime = duration * scrubProgress;
 
-        if (Math.abs(video.currentTime - targetTime) > 0.04) {
+        if (Math.abs(video.currentTime - targetTime) > 0.08) {
           video.currentTime = targetTime;
         }
       }
@@ -493,11 +532,7 @@ export default function Page() {
   // ==========================================
   return (
     <div className="uppilot-page">
-      <motion.main className="page-main">
-        <div className="page-content">
-        {/* ========================================== */}
-        {/* 14. NAVBAR */}
-        {/* ========================================== */}
+      <header className={`nav-shell ${isHeaderVisible ? "is-visible" : "is-hidden"} ${scrolled ? "is-scrolled" : ""}`}>
         <nav className={`nav ${scrolled ? "scrolled" : ""}`} id="nav" aria-label="Navigazione principale">
           <div className="nav-logo">
             <div className="nav-icon">UP</div>
@@ -517,7 +552,10 @@ export default function Page() {
             </a>
           </div>
         </nav>
+      </header>
 
+      <motion.main className="page-main">
+        <div className="page-content">
         {/* ========================================== */}
         {/* 15. HERO */}
         {/* ========================================== */}
@@ -585,14 +623,17 @@ export default function Page() {
                       <span />
                       <span />
                     </div>
-                    <video
-                      ref={videoRef}
-                      className="hero-dashboard-video"
-                      src="/hero-demo.mp4"
-                      muted
-                      playsInline
-                      preload="auto"
-                    />
+                    <div className="hero-dashboard-video-frame">
+                      <video
+                        ref={videoRef}
+                        className="hero-dashboard-video"
+                        src="/hero-demo.mp4"
+                        muted
+                        loop
+                        playsInline
+                        preload="auto"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -635,6 +676,7 @@ export default function Page() {
 
                     setPricingCategory(category);
                     setHoveredPricingPlan(null);
+                    setOpenMobilePlan(1);
                   }}
                 >
                   {category === "creator" ? "Creator" : "Agency"}
@@ -654,7 +696,7 @@ export default function Page() {
         </div>
 
         <motion.div
-          className={`pricing-stage ${hoveredPricingPlan !== null ? "is-hover-previewing" : ""}`}
+          className={`pricing-stage pricing-stage-desktop ${hoveredPricingPlan !== null ? "is-hover-previewing" : ""}`}
           id="pricing-grid"
           aria-live="polite"
           onMouseLeave={clearPricingPreview}
@@ -703,6 +745,75 @@ export default function Page() {
           })}
         </motion.div>
 
+        <div className="pricing-mobile-stack" aria-live="polite">
+          {pricing.map((plan, index) => {
+            const shownPrice = plan.yearly !== undefined && annual ? plan.yearly : plan.monthly;
+            const isOpen = openMobilePlan === index;
+            const detailsId = `mobile-pricing-${pricingCategory}-${index}`;
+
+            return (
+              <div
+                key={`mobile-${pricingCategory}-${plan.name}`}
+                className={`mobile-price-card ${plan.highlighted ? "highlight" : ""} ${isOpen ? "is-open" : ""}`}
+              >
+                <div className="price-card-inner">
+                  <button
+                    type="button"
+                    className="mobile-price-trigger"
+                    aria-expanded={isOpen}
+                    aria-controls={detailsId}
+                    onClick={() => setOpenMobilePlan(index)}
+                  >
+                    <span>
+                      {plan.badge && <span className="price-card-badge">{plan.badge}</span>}
+                      <span className="price-plan">{plan.name}</span>
+                    </span>
+
+                    <span className="mobile-price-summary">
+                      <span>{`€${shownPrice}`}</span>
+                      <span>{plan.suffix ?? "/mese"}</span>
+                    </span>
+                  </button>
+
+                  <motion.div
+                    id={detailsId}
+                    className="mobile-price-details"
+                    initial={false}
+                    animate={isOpen ? "open" : "collapsed"}
+                    variants={{
+                      open: { height: "auto", opacity: 1, marginTop: 20 },
+                      collapsed: { height: 0, opacity: 0, marginTop: 0 },
+                    }}
+                    transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+                    aria-hidden={!isOpen}
+                  >
+                    <div className="mobile-price-details-inner">
+                      <p className="price-description">{plan.description}</p>
+
+                      <div className="price-features">
+                        {plan.features.map((feature) => (
+                          <div key={feature} className="price-feature">
+                            <div className="price-check">✓</div>
+                            {feature}
+                          </div>
+                        ))}
+                      </div>
+
+                      <a
+                        href="#"
+                        className={`price-cta ${plan.highlighted ? "primary" : "outline"}`}
+                        tabIndex={isOpen ? 0 : -1}
+                      >
+                        {plan.cta}
+                      </a>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
         <div ref={nextRevealRef()} className="founding-banner fade">
           <div>
             <h4>Accesso fondatori</h4>
@@ -711,21 +822,6 @@ export default function Page() {
           <a href="#" className="btn-primary founding-btn">
             Riserva il tuo accesso
           </a>
-        </div>
-        </section>
-
-      {/* ========================================== */}
-      {/* 18. TESTIMONIAL */}
-      {/* ========================================== */}
-        <section className="testimonial">
-        <div ref={nextRevealRef()} className="testimonial-inner fade">
-          <div className="testimonial-quote-mark">&quot;</div>
-          <blockquote>
-            Con UpPilot ho eliminato 3 ore al giorno di lavoro manuale. Carico il piano editoriale il lunedì e per
-            tutta la settimana si pubblica da solo.
-          </blockquote>
-          <div className="testimonial-author">Social Media Manager</div>
-          <div className="testimonial-role">Agenzia, 8 clienti</div>
         </div>
         </section>
 
