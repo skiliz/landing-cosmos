@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import type { Variants } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
+import IPhoneMockup from "./components/IPhoneMockup";
 
 type JourneyStep = {
   step: string;
@@ -69,9 +70,8 @@ const journeySteps: JourneyStep[] = [
   {
     step: "06",
     phase: "AVVISI",
-    title: "Notifiche utili, solo quando servono",
-    description:
-      "Ricevi avvisi su pubblicazioni riuscite, problemi di consegna e token in scadenza senza controllare continuamente la dashboard.",
+    title: "Sai subito cosa richiede attenzione",
+    description: "Pubblicazioni riuscite, errori e token in scadenza arrivano dove lavori già. Niente controlli continui.",
     metric: "Alert WhatsApp",
     accent: "blue",
     tools: ["WhatsApp", "Token"],
@@ -131,6 +131,13 @@ export default function ProductJourneySection() {
         const rect = step.getBoundingClientRect();
         const stepCenter = rect.top + rect.height * 0.5;
         const distance = Math.abs(stepCenter - viewportAnchor);
+
+        if (steps[index]?.mockup === "alerts") {
+          const scrollZone = window.innerHeight + rect.height;
+          const progress = Math.min(Math.max((window.innerHeight - rect.top) / scrollZone, 0), 1);
+          const parallaxY = (0.5 - progress) * 28;
+          step.style.setProperty("--alerts-parallax-y", `${parallaxY.toFixed(2)}px`);
+        }
 
         if (distance < closestDistance) {
           closestDistance = distance;
@@ -210,7 +217,15 @@ export default function ProductJourneySection() {
                   <span>STEP {step.step}</span>
                   <span>{step.phase}</span>
                 </motion.div>
-                <motion.h3 variants={childVariants}>{step.title}</motion.h3>
+                <motion.h3 variants={childVariants}>
+                  {step.mockup === "alerts" ? (
+                    <>
+                      Sai subito cosa richiede <span className="journey-title-accent">attenzione</span>
+                    </>
+                  ) : (
+                    step.title
+                  )}
+                </motion.h3>
                 <motion.p variants={childVariants}>{step.description}</motion.p>
                 <motion.div className="journey-step-metric" variants={childVariants}>
                   <span />
@@ -457,37 +472,7 @@ function AlertsMockup() {
   return (
     <div className="mockup-body alerts-mockup">
       <div className="whatsapp-alert-space">
-        <div className="alert-phone-card">
-          <div className="alert-phone-header">
-            <span>W</span>
-            <div>
-              <strong>UpPilot</strong>
-              <p>aggiornamenti in tempo reale</p>
-            </div>
-          </div>
-
-          <div className="alert-feed">
-            {[
-              ["Pubblicato", "Post pubblicato con successo su Instagram.", "success"],
-              ["Approvato", "Il cliente ha approvato il contenuto.", "approved"],
-              ["Attenzione", "Token Meta in scadenza tra 3 giorni.", "warning"],
-              ["Errore", "Errore di pubblicazione rilevato.", "error"],
-            ].map(([label, text, status]) => (
-              <div key={label} className={`alert-message is-${status}`}>
-                <i />
-                <div>
-                  <strong>{label}</strong>
-                  <p>{text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="alert-delivery-state">
-            <span />
-            Notifiche WhatsApp attive
-          </div>
-        </div>
+        <IPhoneMockup className="ios-device-stage" width={300} />
       </div>
     </div>
   );
