@@ -929,9 +929,24 @@ function Footer({ opacity, borderRadius, scale, y }: FooterProps) {
             </p>
             <a href="mailto:info@uppilot.com">info@uppilot.com</a>
             <div className="footer-social-row" aria-label="Social links">
-              <a href="#" aria-label="Instagram">
+              <a
+                href="https://instagram.com/uppilot.ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
                 <svg aria-hidden="true" viewBox="0 0 24 24">
                   <path d="M7.75 2h8.5A5.76 5.76 0 0 1 22 7.75v8.5A5.76 5.76 0 0 1 16.25 22h-8.5A5.76 5.76 0 0 1 2 16.25v-8.5A5.76 5.76 0 0 1 7.75 2Zm0 2A3.75 3.75 0 0 0 4 7.75v8.5A3.75 3.75 0 0 0 7.75 20h8.5A3.75 3.75 0 0 0 20 16.25v-8.5A3.75 3.75 0 0 0 16.25 4h-8.5ZM12 7.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Zm0 2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6Zm5.15-2.32a1.12 1.12 0 1 1 0 2.24 1.12 1.12 0 0 1 0-2.24Z" />
+                </svg>
+              </a>
+              <a
+                href="https://facebook.com/uppilot"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+              >
+                <svg aria-hidden="true" viewBox="0 0 24 24">
+                  <path d="M13.5 22v-8h2.7l.4-3.2h-3.1V8.75c0-.92.26-1.55 1.58-1.55h1.68V4.33A22.5 22.5 0 0 0 14.3 4.2c-2.45 0-4.13 1.5-4.13 4.24v2.36H7.5V14h2.67v8h3.33Z" />
                 </svg>
               </a>
               <a href="#" aria-label="LinkedIn">
@@ -984,8 +999,9 @@ function Footer({ opacity, borderRadius, scale, y }: FooterProps) {
         <div className="footer-bottom">
           <span>© 2026 UpPilot. Tutti i diritti riservati.</span>
           <div>
-            <a href="#">Privacy</a>
-            <a href="#">Termini</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/termini">Termini</a>
+            <a href="/cookie-policy">Cookie Policy</a>
           </div>
         </div>
       </div>

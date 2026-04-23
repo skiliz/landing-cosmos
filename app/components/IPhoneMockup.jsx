@@ -1,397 +1,558 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+// iPhone 15 Pro — Natural Titanium
+// Dimensions: 146.6 x 70.6 mm -> aspect 2.077
+// At 360px width -> scale 5.1 px/mm
+// Frame: Natural Titanium (#A4A096-#D0C8BA)
+// Screen: iOS 18 style abstract wallpaper — flowing navy/violet/teal
+// Hardware: Dynamic Island with camera + prox sensor, side buttons, SIM,
+//           USB-C, mic, speaker dots, inner bezel ring
+// Lock screen: date, clock, flashlight + camera affordances, lock icon,
+//              WhatsApp notifications, home indicator
 
-/* ─────────────────────────────────────────────────────────────
-   CONSTANTS — all dimensions derived from W
-───────────────────────────────────────────────────────────── */
-const W = 300;
-const H = Math.round(W * 2.165);   // 649
-const R  = 50;    // outer corner radius
-const Ri = 44;    // inner screen radius
-const B  = 4;     // bezel thickness
-
-/* ─────────────────────────────────────────────────────────────
-   WHATSAPP ICON
-───────────────────────────────────────────────────────────── */
-function WaIcon() {
-  return (
-    <div style={{
-      width: 40, height: 40, borderRadius: 10, flexShrink: 0,
-      background: "linear-gradient(175deg,#2ecc71 0%,#25b85a 50%,#1aab4e 100%)",
-      display:"flex",alignItems:"center",justifyContent:"center",
-      boxShadow:"0 3px 10px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.30)",
-      position:"relative", overflow:"hidden",
-    }}>
-      {/* gloss on icon */}
-      <div style={{position:"absolute",top:0,left:0,right:0,height:"45%",
-        background:"linear-gradient(180deg,rgba(255,255,255,0.25),transparent)",
-        borderRadius:"10px 10px 0 0"}}/>
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
-        <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.36C8.44 21.52 10.19 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm4.93 13.44c-.21.58-.95 1.06-1.6 1.2-.42.09-.97.16-2.83-.61-2.38-.97-3.92-3.4-4.04-3.56-.12-.15-.97-1.29-.97-2.46 0-1.17.61-1.75.83-1.99.22-.24.48-.3.64-.3h.45c.15 0 .35-.05.54.41.2.48.68 1.67.74 1.79.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.25.31-.36.42-.12.12-.24.25-.1.49.14.24.62.98 1.33 1.59.91.79 1.69 1.03 1.93 1.15.24.12.38.1.52-.06.14-.16.6-.7.76-.94.16-.24.32-.2.54-.12.22.08 1.39.66 1.63.78.24.12.4.18.46.28.06.1.06.58-.15 1.16z"/>
-      </svg>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────
-   NOTIFICATION CARD
-───────────────────────────────────────────────────────────── */
-function Notif({ sender, msg, time, delay }) {
-  const [on, setOn] = useState(false);
-  useEffect(() => { const t = setTimeout(()=>setOn(true), delay); return ()=>clearTimeout(t); }, [delay]);
-  return (
-    <div style={{
-      background:"rgba(26,26,44,0.82)",
-      backdropFilter:"blur(40px)", WebkitBackdropFilter:"blur(40px)",
-      borderRadius:16, padding:"11px 13px",
-      display:"flex", gap:11, alignItems:"flex-start",
-      border:"1px solid rgba(255,255,255,0.11)",
-      boxShadow:"0 6px 28px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.08),inset 0 -1px 0 rgba(0,0,0,0.2)",
-      opacity: on?1:0,
-      transform: on?"translateY(0) scale(1)":"translateY(18px) scale(0.96)",
-      transition:"opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1)",
-    }}>
-      <WaIcon/>
-      <div style={{flex:1,minWidth:0}}>
-        <div style={{display:"flex",justifyContent:"space-between",marginBottom:1}}>
-          <span style={{color:"rgba(255,255,255,0.48)",fontSize:10.5,fontWeight:600,letterSpacing:0.5,textTransform:"uppercase"}}>WhatsApp</span>
-          <span style={{color:"rgba(255,255,255,0.38)",fontSize:11.5,flexShrink:0,marginLeft:8}}>{time}</span>
-        </div>
-        {sender&&<div style={{color:"rgba(255,255,255,0.96)",fontSize:14,fontWeight:600,lineHeight:1.3,marginBottom:1.5}}>{sender}</div>}
-        <div style={{color:"rgba(255,255,255,0.68)",fontSize:13.5,lineHeight:1.42}}>{msg}</div>
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────
-   LOCK SCREEN CONTENT
-───────────────────────────────────────────────────────────── */
-function LockScreen() {
-  const [rdy, setRdy] = useState(false);
-  useEffect(()=>{ setTimeout(()=>setRdy(true),100); },[]);
-
-  return (
-    <div style={{width:"100%",height:"100%",position:"relative",overflow:"hidden",
-      fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',sans-serif"}}>
-
-      {/* ── WALLPAPER ── */}
-      <div style={{position:"absolute",inset:0,
-        background:"linear-gradient(172deg,#08081c 0%,#0c0c28 18%,#10103a 38%,#0c0a2e 55%,#07061a 75%,#050410 100%)"}}/>
-
-      {/* aurora blob 1 — left purple */}
-      <div style={{position:"absolute",
-        top:"28%",left:"-18%",width:"80%",height:"75%",
-        background:"radial-gradient(ellipse,rgba(85,55,210,0.38) 0%,transparent 65%)",
-        filter:"blur(24px)"}}/>
-      {/* aurora blob 2 — right deep blue */}
-      <div style={{position:"absolute",
-        top:"40%",right:"-22%",width:"70%",height:"70%",
-        background:"radial-gradient(ellipse,rgba(50,35,185,0.30) 0%,transparent 60%)",
-        filter:"blur(28px)"}}/>
-      {/* aurora blob 3 — bottom violet */}
-      <div style={{position:"absolute",
-        bottom:"-8%",left:"18%",width:"65%",height:"48%",
-        background:"radial-gradient(ellipse,rgba(100,60,220,0.38) 0%,transparent 62%)",
-        filter:"blur(20px)"}}/>
-      {/* light streak */}
-      <div style={{position:"absolute",top:"-15%",left:"-35%",
-        width:"100%",height:"110%",
-        background:"linear-gradient(148deg,transparent 35%,rgba(90,65,210,0.09) 52%,transparent 65%)",
-        transform:"rotate(-8deg)"}}/>
-
-      {/* ── STATUS BAR ── */}
-      <div style={{position:"relative",zIndex:10,
-        display:"flex",alignItems:"center",justifyContent:"space-between",
-        padding:"14px 24px 2px",height:50}}>
-        <span style={{color:"rgba(255,255,255,0.92)",fontSize:15.5,fontWeight:600,letterSpacing:0.05}}>9:41</span>
-        <div style={{display:"flex",gap:5.5,alignItems:"center"}}>
-          {/* signal bars */}
-          <div style={{display:"flex",gap:2,alignItems:"flex-end",height:12}}>
-            {[3,5,7,9,11].map((h,i)=>(
-              <div key={i} style={{width:3,height:h,borderRadius:1.5,
-                background:i<4?"rgba(255,255,255,0.92)":"rgba(255,255,255,0.25)"}}/>
-            ))}
-          </div>
-          {/* wifi */}
-          <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-            <path d="M8 9.5L9.5 12H6.5Z" fill="rgba(255,255,255,0.92)"/>
-            <path d="M4.5 6.8C5.8 5.5 10.2 5.5 11.5 6.8" stroke="rgba(255,255,255,0.92)" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
-            <path d="M1.5 3.5C3.8 1.1 12.2 1.1 14.5 3.5" stroke="rgba(255,255,255,0.5)" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
-          </svg>
-          {/* battery */}
-          <div style={{position:"relative",width:26,height:12}}>
-            <div style={{position:"absolute",inset:0,border:"1.5px solid rgba(255,255,255,0.65)",borderRadius:3.5}}/>
-            <div style={{position:"absolute",left:2.5,top:2.5,bottom:2.5,width:"66%",
-              background:"rgba(255,255,255,0.92)",borderRadius:1.5}}/>
-            <div style={{position:"absolute",right:-4,top:"50%",transform:"translateY(-50%)",
-              width:3,height:6,background:"rgba(255,255,255,0.45)",borderRadius:"0 2px 2px 0"}}/>
-          </div>
-        </div>
-      </div>
-
-      {/* ── DYNAMIC ISLAND ── */}
-      <div style={{position:"absolute",top:12,left:"50%",transform:"translateX(-50%)",
-        width:"34%",height:34,borderRadius:9999,background:"#000",zIndex:25,
-        boxShadow:"0 0 0 1px rgba(255,255,255,0.05),0 2px 8px rgba(0,0,0,0.8)"}}/>
-
-      {/* ── CLOCK ── */}
-      <div style={{position:"relative",zIndex:10,
-        display:"flex",flexDirection:"column",alignItems:"center",
-        paddingTop:22,
-        opacity:rdy?1:0, transform:rdy?"none":"translateY(-8px)",
-        transition:"opacity 0.6s ease,transform 0.6s ease"}}>
-        {/* lock icon */}
-        <svg width="18" height="22" viewBox="0 0 18 22" fill="none" style={{marginBottom:9}}>
-          <rect x="1.5" y="9.5" width="15" height="11" rx="2.5"
-            stroke="rgba(255,255,255,0.75)" strokeWidth="1.7"/>
-          <path d="M5 9.5V6.5a4 4 0 018 0v3"
-            stroke="rgba(255,255,255,0.75)" strokeWidth="1.7" strokeLinecap="round"/>
-          <circle cx="9" cy="15" r="1.2" fill="rgba(255,255,255,0.75)"/>
-        </svg>
-        <div style={{color:"rgba(255,255,255,0.75)",fontSize:16,fontWeight:400,letterSpacing:0.15,marginBottom:1}}>
-          Mercoledì, 22 aprile
-        </div>
-        <div style={{color:"rgba(255,255,255,0.97)",fontSize:78,fontWeight:200,
-          letterSpacing:-4,lineHeight:1.0,marginTop:0,
-          textShadow:"0 2px 40px rgba(100,80,255,0.25)"}}>
-          9:41
-        </div>
-      </div>
-
-      {/* ── NOTIFICATIONS ── */}
-      <div style={{position:"relative",zIndex:10,
-        display:"flex",flexDirection:"column",gap:9,
-        padding:"10px 13px 0"}}>
-        <Notif sender="UpPilot" msg="Post pubblicato con successo su Instagram." time="Ora" delay={220}/>
-        <Notif sender="UpPilot" msg="Il cliente ha approvato il contenuto." time="2 min fa" delay={600}/>
-        <Notif msg="Token Meta in scadenza tra 3 giorni." time="8 min fa" delay={980}/>
-        <Notif sender="UpPilot" msg="Errore di pubblicazione rilevato." time="12 min fa" delay={1360}/>
-      </div>
-
-      {/* ── BOTTOM CONTROLS ── */}
-      <div style={{position:"absolute",bottom:22,left:0,right:0,zIndex:10,
-        display:"flex",justifyContent:"space-between",padding:"0 48px"}}>
-        {[
-          <svg key="t" width="15" height="22" viewBox="0 0 15 22" fill="none">
-            <path d="M5.5 1h4l2 9H3.5L5.5 1z" stroke="white" strokeWidth="1.6" strokeLinejoin="round"/>
-            <path d="M3.5 10l-2 9h11l-2-9" stroke="white" strokeWidth="1.6" strokeLinejoin="round"/>
-            <line x1="7.5" y1="14" x2="7.5" y2="19" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-          </svg>,
-          <svg key="c" width="22" height="18" viewBox="0 0 22 18" fill="none">
-            <rect x="1" y="4" width="20" height="13" rx="3" stroke="white" strokeWidth="1.6"/>
-            <circle cx="11" cy="10.5" r="3.5" stroke="white" strokeWidth="1.6"/>
-            <path d="M7.5 4l1.3-3h4.4l1.3 3" stroke="white" strokeWidth="1.6" strokeLinecap="round"/>
-            <circle cx="17.5" cy="7" r="1" fill="white"/>
-          </svg>
-        ].map((ic,i)=>(
-          <div key={i} style={{width:50,height:50,borderRadius:"50%",
-            background:"rgba(255,255,255,0.15)",
-            backdropFilter:"blur(28px)",WebkitBackdropFilter:"blur(28px)",
-            border:"1px solid rgba(255,255,255,0.14)",
-            display:"flex",alignItems:"center",justifyContent:"center",
-            boxShadow:"0 4px 16px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.18)"}}>
-            {ic}
-          </div>
-        ))}
-      </div>
-
-      {/* home indicator */}
-      <div style={{position:"absolute",bottom:8,left:"50%",transform:"translateX(-50%)",
-        width:120,height:5,borderRadius:3,
-        background:"rgba(255,255,255,0.30)",zIndex:10}}/>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────
-   MAIN COMPONENT
-───────────────────────────────────────────────────────────── */
-/**
- * @param {{ className?: string; size?: number; width?: number }} props
- */
-export default function IPhoneMockup(props = {}) {
-  const { className = "", size, width } = props;
-  const [fy, setFy] = useState(0);
-  const [frx, setFrx] = useState(2);
-  const [mouseX, setMouseX] = useState(0);
-  const [mouseY, setMouseY] = useState(0);
-  const rafRef = useRef(null);
-  const targetWidth = size ?? width ?? 380;
-  const scale = targetWidth / W;
-
-  /* floating animation */
-  useEffect(()=>{
-    let start = null;
-    const loop = (ts)=>{
-      if(!start) start=ts;
-      const t=(ts-start)/1000;
-      setFy(Math.sin((t*Math.PI*2)/5.5)*9);
-      setFrx(2+Math.sin((t*Math.PI*2)/7)*0.5);
-      rafRef.current=requestAnimationFrame(loop);
-    };
-    rafRef.current=requestAnimationFrame(loop);
-    return ()=>cancelAnimationFrame(rafRef.current);
-  },[]);
-
-  /* subtle mouse parallax */
-  const handleMouse = (e)=>{
-    const {left,top,width,height}=e.currentTarget.getBoundingClientRect();
-    const x=((e.clientX-left)/width-0.5)*2;
-    const y=((e.clientY-top)/height-0.5)*2;
-    setMouseX(x); setMouseY(y);
+export default function IPhoneMockup({ className = "" } = {}) {
+  // Natural Titanium palette
+  const ti = {
+    specular: "#E4DCD0",
+    light:    "#CEC6B8",
+    midLight: "#BAB2A4",
+    mid:      "#ACA498",
+    midShadow:"#A4A094",
+    shadow:   "#B0A89C",
+    loBounce: "#C0B8AA",
+    lo:       "#CAC2B4",
+    base:     "#D0C8BA",
   };
-  const handleLeave=()=>{ setMouseX(0); setMouseY(0); };
 
-  const tiltY = -7 + mouseX * 3;
-  const tiltX =  frx - mouseY * 1.5;
+  const btn = (side) => ({
+    position:     "absolute",
+    width:        3.5,
+    borderRadius: side === "left" ? "2px 0 0 2px" : "0 2px 2px 0",
+    background:
+      side === "left"
+        ? `linear-gradient(90deg, ${ti.loBounce} 0%, ${ti.light} 45%, ${ti.specular} 70%, ${ti.mid} 100%)`
+        : `linear-gradient(270deg, ${ti.loBounce} 0%, ${ti.light} 45%, ${ti.specular} 70%, ${ti.mid} 100%)`,
+    boxShadow:
+      side === "left"
+        ? "-1.5px 0 4px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,248,235,0.35), inset 0 -1px 0 rgba(0,0,0,0.25)"
+        : " 1.5px 0 4px rgba(0,0,0,0.36), inset 0 1px 0 rgba(255,248,235,0.35), inset 0 -1px 0 rgba(0,0,0,0.25)",
+    left:  side === "left"  ? -3.5 : undefined,
+    right: side === "right" ? -3.5 : undefined,
+    zIndex: 20,
+  });
+
+  // iOS 18 native wallpaper — served as an SVG asset from /public with
+  // flowing organic bloom shapes (heavy Gaussian blur) over a deep OLED base.
+  // See public/wallpapers/ios18-dark.svg
+  const wallpaperUrl = "url('/wallpapers/ios18-dark.svg')";
 
   return (
     <div
       className={className}
-      onMouseMove={handleMouse}
-      onMouseLeave={handleLeave}
       style={{
-        display:"flex",alignItems:"center",justifyContent:"center",
-        position:"relative",overflow:"visible",
-        width: W * scale + 80,
-        maxWidth:"100%",
-      }}>
-      {/* ── PHONE WRAPPER (float + perspective + parallax) ── */}
+        width:              "var(--iphone-width,  360px)",
+        height:             "var(--iphone-height, 735px)",
+        position:           "relative",
+        userSelect:         "none",
+        WebkitUserSelect:   "none",
+      }}
+    >
+      {/* ── Left side hardware ─────────────────────────────────────── */}
+      {/* Action button */}
+      <div style={{ ...btn("left"), top: "13.2%", height: 30 }} />
+      {/* Volume up */}
+      <div style={{ ...btn("left"), top: "21.2%", height: 56 }} />
+      {/* Volume down */}
+      <div style={{ ...btn("left"), top: "29.8%", height: 56 }} />
+      {/* SIM tray seam */}
       <div style={{
-        transform:`perspective(1400px) rotateY(${tiltY}deg) rotateX(${tiltX}deg) translateY(${fy}px) scale(${scale})`,
-        willChange:"transform",
-        transition:"transform 0.08s linear",
-        padding:40,
-        transformOrigin:"center center",
-      }}>
+        ...btn("left"),
+        top:    "63.5%",
+        height: 22,
+        width:  3,
+        background: `linear-gradient(90deg, ${ti.midShadow} 0%, ${ti.midLight} 60%, ${ti.light} 100%)`,
+        boxShadow: "-1px 0 3px rgba(0,0,0,0.32), inset 0 10px 0 rgba(0,0,0,0.10)",
+      }} />
 
-        {/* ══ OUTER TITANIUM FRAME ══ */}
-        <div style={{
-          width:W, height:H,
-          borderRadius:R,
-          position:"relative",
-          /* titanium brush gradient — light hits top-left */
-          background:`linear-gradient(
-            158deg,
-            #3a3a3c 0%,
-            #2c2c2e 12%,
-            #1e1e20 28%,
-            #252527 50%,
-            #1c1c1e 65%,
-            #2a2a2c 80%,
-            #363638 100%
-          )`,
-          boxShadow:[
-            /* rim light */
-            "0 0 0 0.6px rgba(255,255,255,0.14)",
-            /* inner inset edge */
-            "inset 0 0 0 0.5px rgba(255,255,255,0.06)",
-            /* tight contact shadow */
-            "0 4px 10px rgba(0,0,0,0.22)",
-            /* mid shadow */
-            "0 20px 60px rgba(0,0,0,0.48)",
-            /* deep ambient shadow */
-            "0 60px 140px rgba(0,0,0,0.68)",
-            /* colour-tinted glow */
-            "0 0 80px rgba(60,40,160,0.12)",
-          ].join(","),
-        }}>
+      {/* ── Right side hardware ─────────────────────────────────────── */}
+      {/* Power / side button */}
+      <div style={{ ...btn("right"), top: "26.0%", height: 80 }} />
 
-          {/* ── BRUSHED METAL TEXTURE overlay ── */}
-          {/* horizontal micro-lines simulate brushed titanium */}
-          <div style={{position:"absolute",inset:0,borderRadius:R,
-            backgroundImage:`repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 2px,
-              rgba(255,255,255,0.015) 2px,
-              rgba(255,255,255,0.015) 3px
-            )`,
-            pointerEvents:"none",zIndex:1}}/>
+      {/* ── Phone frame body ─────────────────────────────────────────── */}
+      <div
+        style={{
+          position:     "relative",
+          width:        "100%",
+          height:       "100%",
+          borderRadius: 54,
+          overflow:     "visible",
+          background: [
+            // Warm specular sweep (top-left)
+            "linear-gradient(138deg, rgba(255,248,235,0.40) 0%, rgba(255,248,235,0.10) 16%, transparent 34%)",
+            // Subtle bottom-right bounce
+            "linear-gradient(318deg, rgba(255,248,235,0.18) 0%, transparent 22%)",
+            // Side-light fall-off for 3D cylindrical feel
+            "linear-gradient(90deg, rgba(0,0,0,0.10) 0%, transparent 8%, transparent 92%, rgba(0,0,0,0.10) 100%)",
+            // Base Natural Titanium vertical ramp
+            `linear-gradient(168deg,` +
+              `${ti.specular} 0%, ` +
+              `${ti.light}    7%, ` +
+              `${ti.midLight} 18%, ` +
+              `${ti.mid}      32%, ` +
+              `${ti.midShadow}48%, ` +
+              `${ti.shadow}   62%, ` +
+              `${ti.loBounce} 76%, ` +
+              `${ti.lo}       88%, ` +
+              `${ti.base}     100%)`,
+          ].join(", "),
+          boxShadow: [
+            // Crisp top rim warm highlight
+            "inset 0  1.5px 0 rgba(255,248,235,0.55)",
+            // Bottom rim shadow
+            "inset 0 -1.2px 0 rgba(0,0,0,0.28)",
+            // Ambient floor contact shadow (close, soft)
+            "0 6px 14px -4px rgba(0,0,0,0.55)",
+            // Mid drop
+            "0 22px 42px -14px rgba(0,0,0,0.55)",
+            // Long atmospheric shadow — lifts the phone off the page
+            "0 64px 120px -28px rgba(0,0,0,0.65)",
+            // Violet ambient bleed from wallpaper onto floor
+            "0 42px 90px -40px rgba(90,40,220,0.35)",
+          ].join(", "),
+        }}
+      >
+        {/* ── Inner bezel ring: thin black band between titanium and glass ─── */}
+        <div
+          style={{
+            position:     "absolute",
+            top: 5, left: 5, right: 5, bottom: 5,
+            borderRadius: 50,
+            background:   "#040408",
+            // Inner edge has a razor-thin warm highlight as the glass sits in
+            boxShadow:    "inset 0 0 0 0.6px rgba(255,248,235,0.18)",
+            zIndex:       1,
+          }}
+        />
 
-          {/* ── CHAMFERED EDGE HIGHLIGHTS ── */}
-          {/* top-left edge — brightest (key light source) */}
-          <div style={{position:"absolute",inset:0,borderRadius:R,
-            background:`linear-gradient(
-              135deg,
-              rgba(255,255,255,0.22) 0%,
-              rgba(255,255,255,0.08) 8%,
-              transparent 22%,
-              transparent 75%,
-              rgba(255,255,255,0.05) 88%,
-              rgba(255,255,255,0.10) 100%
-            )`,
-            pointerEvents:"none",zIndex:35}}/>
-
-          {/* top edge thin specular */}
-          <div style={{position:"absolute",top:0,left:R/2,right:R/2,height:1.5,
-            background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.28),rgba(255,255,255,0.18),transparent)",
-            borderRadius:1,pointerEvents:"none",zIndex:36}}/>
-
-          {/* left edge thin specular */}
-          <div style={{position:"absolute",left:0,top:R/2,bottom:R/2,width:1.5,
-            background:"linear-gradient(180deg,rgba(255,255,255,0.2),rgba(255,255,255,0.08),transparent)",
-            borderRadius:1,pointerEvents:"none",zIndex:36}}/>
-
-          {/* bottom edge — darker (shadow side) */}
-          <div style={{position:"absolute",bottom:0,left:R/2,right:R/2,height:1,
-            background:"linear-gradient(90deg,transparent,rgba(0,0,0,0.5),transparent)",
-            borderRadius:1,pointerEvents:"none",zIndex:36}}/>
-
-          {/* ══ SCREEN ══ */}
-          <div style={{
-            position:"absolute",
-            top:B,left:B,right:B,bottom:B,
-            borderRadius:Ri,
-            overflow:"hidden",
-            background:"#000",
-            /* screen sits in frame — depth shadow */
-            boxShadow:"inset 0 0 0 0.5px rgba(0,0,0,1), inset 0 3px 12px rgba(0,0,0,0.7)",
-          }}>
-            <LockScreen/>
-
-            {/* GLASS LAYER 1 — primary reflection (upper-left band) */}
-            <div style={{position:"absolute",inset:0,borderRadius:Ri,
-              background:`linear-gradient(
-                138deg,
-                rgba(255,255,255,0.072) 0%,
-                rgba(255,255,255,0.028) 18%,
-                transparent 42%,
-                transparent 78%,
-                rgba(255,255,255,0.018) 100%
-              )`,
-              pointerEvents:"none",zIndex:50}}/>
-
-            {/* GLASS LAYER 2 — subtle full-surface tint (gives "depth") */}
-            <div style={{position:"absolute",inset:0,borderRadius:Ri,
-              background:"linear-gradient(180deg,rgba(80,70,160,0.04) 0%,transparent 60%)",
-              pointerEvents:"none",zIndex:51}}/>
-
-            {/* GLASS LAYER 3 — top-edge bright catch-light */}
-            <div style={{position:"absolute",top:0,left:"18%",right:"18%",height:1.5,
-              background:"linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent)",
-              pointerEvents:"none",zIndex:52}}/>
-
-            {/* SCREEN-FRAME SEAM */}
-            <div style={{position:"absolute",inset:0,borderRadius:Ri,
-              boxShadow:"inset 0 0 0 1px rgba(0,0,0,0.95), inset 0 2px 14px rgba(0,0,0,0.65)",
-              pointerEvents:"none",zIndex:53}}/>
+        {/* ── Screen glass ──────────────────────────────────────────── */}
+        <div
+          style={{
+            position:        "absolute",
+            top: 7, left: 7, right: 7, bottom: 7,
+            borderRadius:    48,
+            overflow:        "hidden",
+            background:      `${wallpaperUrl} center / cover no-repeat, #02040C`,
+            zIndex:          2,
+          }}
+        >
+          {/* Dynamic Island — with camera + proximity sensor */}
+          <div
+            style={{
+              position:     "absolute",
+              top:          12,
+              left:         "50%",
+              transform:    "translateX(-50%)",
+              width:        124,
+              height:       37,
+              borderRadius: 20,
+              background:   "#000",
+              zIndex:       20,
+              // OLED ambient bleed — the black "melts" into screen at edges
+              boxShadow: [
+                "0 0 0 1px rgba(0,0,0,0.95)",
+                "0 4px 18px rgba(0,0,0,0.80)",
+                "0 0 34px  rgba(0,0,0,0.60)",
+                // Tiny chrome-like upper highlight hinting at OLED cutout
+                "inset 0 0.5px 0 rgba(30,30,45,0.70)",
+              ].join(", "),
+            }}
+          >
+            {/* Front camera dot */}
+            <div style={{
+              position:     "absolute",
+              top:          "50%",
+              right:        14,
+              transform:    "translateY(-50%)",
+              width:        9,
+              height:       9,
+              borderRadius: "50%",
+              background:   "radial-gradient(circle at 35% 35%, #1d2838 0%, #0a0f18 48%, #000 100%)",
+              boxShadow:    "inset 0 0 0 1px rgba(22,30,46,0.9), inset 0 1px 2px rgba(255,255,255,0.05)",
+            }} />
+            {/* Tiny sub-pixel reflection inside camera lens */}
+            <div style={{
+              position:     "absolute",
+              top:          "calc(50% - 3px)",
+              right:        16.5,
+              width:        2,
+              height:       2,
+              borderRadius: "50%",
+              background:   "rgba(120,150,200,0.55)",
+              filter:       "blur(0.2px)",
+            }} />
+            {/* Proximity / FaceID sensor cluster (subtle) */}
+            <div style={{
+              position:     "absolute",
+              top:          "50%",
+              left:         14,
+              transform:    "translateY(-50%)",
+              width:        6,
+              height:       6,
+              borderRadius: "50%",
+              background:   "radial-gradient(circle at 35% 35%, #141a26 0%, #070a12 60%, #000 100%)",
+              opacity:      0.85,
+            }} />
           </div>
 
-          {/* ── OVERALL PHONE GLOSS COAT ── */}
-          {/* very subtle full-phone sheen, sits above everything */}
-          <div style={{position:"absolute",inset:0,borderRadius:R,
-            background:`radial-gradient(
-              ellipse 70% 40% at 30% 20%,
-              rgba(255,255,255,0.04) 0%,
-              transparent 70%
-            )`,
-            pointerEvents:"none",zIndex:38}}/>
+          {/* ── Status bar ───────────────────────────────────────────── */}
+          <div
+            style={{
+              position:   "absolute",
+              top:        18,
+              left:       28,
+              right:      28,
+              display:    "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              zIndex:     15,
+              fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif",
+              color:      "rgba(255,255,255,0.96)",
+            }}
+          >
+            {/* Time */}
+            <span style={{ fontSize: 15.5, fontWeight: 600, letterSpacing: "-0.4px" }}>9:41</span>
 
-        </div>{/* /frame */}
-      </div>{/* /float wrapper */}
+            <span style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              {/* Cellular signal — 4 bars, last faded */}
+              <svg width="17" height="12" viewBox="0 0 17 12" fill="none">
+                <rect x="0"    y="5.5" width="3.2" height="6.5" rx="0.9" fill="rgba(255,255,255,0.96)"/>
+                <rect x="4.6"  y="3.5" width="3.2" height="8.5" rx="0.9" fill="rgba(255,255,255,0.96)"/>
+                <rect x="9.2"  y="1.5" width="3.2" height="10.5" rx="0.9" fill="rgba(255,255,255,0.96)"/>
+                <rect x="13.8" y="0"   width="3.2" height="12"   rx="0.9" fill="rgba(255,255,255,0.32)"/>
+              </svg>
+              {/* WiFi */}
+              <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
+                <circle cx="8" cy="11" r="1.6" fill="rgba(255,255,255,0.96)"/>
+                <path d="M4.4 7.8C5.5 6.7 6.7 6.1 8 6.1s2.5.6 3.6 1.7" stroke="rgba(255,255,255,0.96)" strokeWidth="1.3" strokeLinecap="round"/>
+                <path d="M1.3 4.8C3.1 2.9 5.4 1.8 8 1.8s4.9 1.1 6.7 3.0" stroke="rgba(255,255,255,0.96)" strokeWidth="1.3" strokeLinecap="round"/>
+              </svg>
+              {/* Battery */}
+              <svg width="26" height="13" viewBox="0 0 26 13" fill="none">
+                <rect x="0.6" y="0.6" width="21.8" height="11.8" rx="2.8" stroke="rgba(255,255,255,0.55)" strokeWidth="1.1"/>
+                <rect x="2.2" y="2.2" width="16"   height="8.6"  rx="1.7" fill="rgba(255,255,255,0.94)"/>
+                <path d="M23.4 4.4v4.2" stroke="rgba(255,255,255,0.46)" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+            </span>
+          </div>
+
+          {/* ── Lock icon ────────────────────────────────────────────── */}
+          <div
+            style={{
+              position:  "absolute",
+              top:       64,
+              left:      "50%",
+              transform: "translateX(-50%)",
+              zIndex:    5,
+              opacity:   0.82,
+            }}
+            aria-hidden="true"
+          >
+            <svg width="14" height="18" viewBox="0 0 14 18" fill="none">
+              <rect x="1" y="7" width="12" height="10" rx="2.4" fill="rgba(255,255,255,0.92)" />
+              <path
+                d="M3.5 7V5a3.5 3.5 0 0 1 7 0v2"
+                stroke="rgba(255,255,255,0.92)"
+                strokeWidth="1.6"
+                fill="none"
+                strokeLinecap="round"
+              />
+              <circle cx="7" cy="12" r="1.1" fill="rgba(0,0,0,0.70)" />
+            </svg>
+          </div>
+
+          {/* Date label */}
+          <div
+            style={{
+              position:      "absolute",
+              top:           96,
+              left: 0, right: 0,
+              textAlign:     "center",
+              color:         "rgba(255,255,255,0.70)",
+              fontSize:      20,
+              fontWeight:    400,
+              letterSpacing: "0.1px",
+              fontFamily:    "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
+              zIndex:        5,
+              textShadow:    "0 1px 10px rgba(0,0,0,0.25)",
+            }}
+          >
+            Wednesday, April 22
+          </div>
+
+          {/* Large clock */}
+          <div
+            style={{
+              position:      "absolute",
+              top:           118,
+              left: 0, right: 0,
+              textAlign:     "center",
+              color:         "#fff",
+              fontSize:      92,
+              fontWeight:    200,
+              letterSpacing: "-6px",
+              fontFamily:    "-apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif",
+              lineHeight:    1,
+              zIndex:        5,
+              textShadow:    "0 2px 18px rgba(0,0,0,0.28)",
+            }}
+          >
+            9:41
+          </div>
+
+          {/* ── Notification cards ────────────────────────────────────── */}
+          <div
+            style={{
+              position:       "absolute",
+              top:            314,
+              left:           12, right: 12,
+              display:        "flex",
+              flexDirection:  "column",
+              gap:            10,
+              zIndex:         5,
+            }}
+          >
+            {[
+              { text: "Post pubblicato su Instagram.",      ago: "ora" },
+              { text: "Cliente ha approvato il contenuto.", ago: "2m"  },
+              { text: "Token Meta in scadenza tra 7g.",     ago: "14m" },
+            ].map(({ text, ago }) => (
+              <div
+                key={text}
+                style={{
+                  display:      "flex",
+                  gap:          11,
+                  background:   "rgba(14,14,22,0.72)",
+                  borderRadius: 22,
+                  padding:      "13px 14px",
+                  backdropFilter:       "blur(36px) saturate(140%)",
+                  WebkitBackdropFilter: "blur(36px) saturate(140%)",
+                  border:       "1px solid rgba(255,255,255,0.08)",
+                  alignItems:   "flex-start",
+                  boxShadow: [
+                    "0 2px 12px rgba(0,0,0,0.35)",
+                    "inset 0 1px 0 rgba(255,255,255,0.06)",
+                  ].join(", "),
+                }}
+              >
+                {/* WhatsApp icon — iOS squircle */}
+                <div
+                  style={{
+                    width:        36,
+                    height:       36,
+                    borderRadius: 8,
+                    background:   "linear-gradient(150deg, #3FD56A, #25D366 60%, #1DAB52)",
+                    flexShrink:   0,
+                    display:      "flex",
+                    alignItems:   "center",
+                    justifyContent: "center",
+                    boxShadow:    "0 2px 8px rgba(37,211,102,0.30), inset 0 1px 0 rgba(255,255,255,0.18)",
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+                    <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.07L2 22l5.07-1.37C8.42 21.5 10.15 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm.02 18c-1.68 0-3.26-.47-4.6-1.27l-.33-.2-3.41.92.93-3.32-.22-.34A8.02 8.02 0 0 1 4 12c0-4.42 3.6-8 8.02-8S20 7.58 20 12s-3.58 8-7.98 8zm4.43-5.97c-.23-.12-1.38-.68-1.6-.76-.21-.08-.37-.12-.52.12-.16.24-.6.76-.74.92-.14.16-.27.18-.5.06-.23-.12-.97-.36-1.85-1.14-.68-.61-1.14-1.36-1.28-1.59-.13-.23-.01-.36.1-.47.1-.1.23-.27.35-.4.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.52-1.26-.72-1.73-.19-.45-.38-.39-.52-.4-.14 0-.3-.01-.46-.01-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2.01s.86 2.33.98 2.5c.12.16 1.68 2.57 4.08 3.6.57.25 1.01.4 1.36.51.57.18 1.09.16 1.5.1.46-.07 1.41-.58 1.61-1.13.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28z"/>
+                  </svg>
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    color:         "rgba(255,255,255,0.92)",
+                    fontWeight:    600,
+                    fontSize:      12.5,
+                    marginBottom:  2,
+                    fontFamily:    "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif",
+                    letterSpacing: "-0.1px",
+                  }}>UpPilot</div>
+                  <div style={{
+                    color:         "rgba(255,255,255,0.70)",
+                    fontSize:      12.5,
+                    lineHeight:    1.3,
+                    fontFamily:    "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif",
+                    letterSpacing: "-0.1px",
+                    overflow:      "hidden",
+                    textOverflow:  "ellipsis",
+                    whiteSpace:    "nowrap",
+                  }}>{text}</div>
+                </div>
+
+                <div style={{
+                  color:      "rgba(255,255,255,0.38)",
+                  fontSize:   11,
+                  flexShrink: 0,
+                  fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif",
+                  paddingTop: 1,
+                }}>{ago}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* ── Flashlight + Camera bottom affordances ─────────────────── */}
+          <LockAffordance side="left">
+            {/* Flashlight icon */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M8 2h8l-1 5-3 3-3-3-1-5zm1 12l3-1 3 1v6a3 3 0 0 1-6 0v-6z"
+                fill="#fff"
+              />
+            </svg>
+          </LockAffordance>
+          <LockAffordance side="right">
+            {/* Camera icon */}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M9 4l-1.5 2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3.5L15 4H9zm3 5a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"
+                fill="#fff"
+              />
+            </svg>
+          </LockAffordance>
+
+          {/* ── Screen glare — subtle diagonal sheen on glass ───────── */}
+          <div
+            style={{
+              position:      "absolute",
+              inset:         0,
+              borderRadius:  48,
+              background: [
+                // Main diagonal sheen from top-left — like real glass catching light
+                "linear-gradient(148deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.03) 18%, transparent 38%)",
+                // Secondary low-right ambient bounce
+                "linear-gradient(220deg, rgba(255,255,255,0.025) 0%, transparent 34%)",
+                // Tight top-right specular pinpoint
+                "radial-gradient(ellipse 30% 14% at 82% 6%, rgba(255,255,255,0.10) 0%, transparent 70%)",
+              ].join(", "),
+              pointerEvents: "none",
+              zIndex:        30,
+            }}
+          />
+
+          {/* ── Inner screen edge shadow (depth under bezel) ───────── */}
+          <div
+            style={{
+              position:      "absolute",
+              inset:         0,
+              borderRadius:  48,
+              boxShadow:     "inset 0 0 28px rgba(0,0,0,0.55), inset 0 0 0 0.5px rgba(255,255,255,0.05)",
+              pointerEvents: "none",
+              zIndex:        31,
+            }}
+          />
+
+          {/* Home indicator */}
+          <div
+            style={{
+              position:     "absolute",
+              bottom:       8,
+              left:         "50%",
+              transform:    "translateX(-50%)",
+              width:        134,
+              height:       5,
+              borderRadius: 999,
+              background:   "rgba(255,255,255,0.30)",
+              zIndex:       10,
+            }}
+          />
+        </div>
+
+        {/* ── Inner chamfer line (glass meets titanium, top arc) ───── */}
+        <div
+          style={{
+            position:     "absolute",
+            top:          6,
+            left:         7, right: 7,
+            height:       1,
+            borderRadius: "48px 48px 0 0",
+            background:   "linear-gradient(90deg, transparent 6%, rgba(255,248,235,0.26) 28%, rgba(255,248,235,0.26) 72%, transparent 94%)",
+            pointerEvents: "none",
+            zIndex:       12,
+          }}
+        />
+
+        {/* ── Bottom edge: speaker dots — USB-C — mic ─────────────── */}
+        <div
+          style={{
+            position:  "absolute",
+            bottom:    2,
+            left:      "50%",
+            transform: "translateX(-50%)",
+            display:   "flex",
+            alignItems: "center",
+            gap:        5,
+            zIndex:    20,
+          }}
+        >
+          {[0,1,2,3].map(i => (
+            <div key={`ls${i}`} style={{
+              width:        3.5, height: 3.5,
+              borderRadius: "50%",
+              background:   "rgba(0,0,0,0.46)",
+              boxShadow:    "inset 0 0.5px 1.5px rgba(0,0,0,0.70)",
+            }} />
+          ))}
+
+          {/* USB-C port */}
+          <div style={{
+            width:        26, height: 6,
+            borderRadius: 3,
+            background:   "#06060C",
+            margin:       "0 6px",
+            boxShadow:    "inset 0 1.5px 3px rgba(0,0,0,0.78), 0 0 0 0.5px rgba(255,255,255,0.05)",
+          }} />
+
+          {[0,1,2,3].map(i => (
+            <div key={`rs${i}`} style={{
+              width:        3.5, height: 3.5,
+              borderRadius: "50%",
+              background:   "rgba(0,0,0,0.46)",
+              boxShadow:    "inset 0 0.5px 1.5px rgba(0,0,0,0.70)",
+            }} />
+          ))}
+
+          <div style={{
+            width:        4, height: 4,
+            borderRadius: "50%",
+            background:   "rgba(0,0,0,0.50)",
+            boxShadow:    "inset 0 0.5px 1.5px rgba(0,0,0,0.72)",
+            marginLeft:   4,
+          }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Lock-screen corner affordance button (iOS 16+): frosted circle with icon
+function LockAffordance({ side, children }) {
+  return (
+    <div
+      style={{
+        position:       "absolute",
+        bottom:         44,
+        [side]:         24,
+        width:          44,
+        height:         44,
+        borderRadius:   "50%",
+        background:     "rgba(20,20,30,0.55)",
+        backdropFilter:       "blur(24px) saturate(140%)",
+        WebkitBackdropFilter: "blur(24px) saturate(140%)",
+        border:         "1px solid rgba(255,255,255,0.06)",
+        display:        "flex",
+        alignItems:     "center",
+        justifyContent: "center",
+        opacity:        0.92,
+        boxShadow:      "inset 0 1px 0 rgba(255,255,255,0.08), 0 2px 10px rgba(0,0,0,0.30)",
+        zIndex:         4,
+      }}
+    >
+      {children}
     </div>
   );
 }

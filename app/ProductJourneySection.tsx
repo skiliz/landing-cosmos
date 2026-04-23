@@ -166,7 +166,7 @@ export default function ProductJourneySection() {
         window.cancelAnimationFrame(frame);
       }
     };
-  }, []);
+  }, [steps]);
 
   return (
     <section className="journey-section" id="funzionalita" aria-labelledby="journey-title">
@@ -470,9 +470,9 @@ function PublishMockup() {
 
 function AlertsMockup() {
   return (
-    <div className="mockup-body alerts-mockup">
-      <div className="whatsapp-alert-space">
-        <IPhoneMockup className="ios-device-stage" width={300} />
+    <div className="mockup-body notification-phone-mockup">
+      <div className="notification-phone-stage">
+        <IPhoneMockup className="notification-iphone" />
       </div>
     </div>
   );
